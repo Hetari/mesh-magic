@@ -8,225 +8,29 @@ import type {
 
 /**
  * Validates whether a given string is a standard CSS hexadecimal color.
- * We need this validation to avoid processing invalid strings in conversion
- * functions that expect specific formatting.
- *
- * @param hex - The string to validate (e.g., "#FFF", "#FFFFFF").
- * @returns True if the string matches 3 or 6-digit hex format.
  */
-export const isHexColorValid = (hex: HexColor) => {
-  // Regex ensures we only accept valid hexadecimal digits and the '#' prefix
-  // supporting short (3, 4-char) and standard (6, 8-char) formats.
+export const isHexColorValid = (hex: HexColor): boolean => {
   const hexRegex =
     /^#([A-Fa-f0-9]{8}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})$/;
   return hexRegex.test(hex);
 };
 
 /**
- * Converts a hexadecimal color string into an RGBA object.
- * This is the entry point for color parsing when a user types a color
- * or when loading saved colors from a configuration.
- *
- * @param hex - The hex string or CSS color name to convert.
- * @returns An RgbColor object or null if the input is unrecognizable.
+ * Resolves a CSS color name to its hexadecimal value using the browser's engine.
  */
-export const hexToRgb = (hex: HexColor): RgbColor | null => {
-  // Guard against invalid inputs to prevent parseInt from returning NaN
-  if (!isHexColorValid(hex)) {
-    // If it's not a hex, try resolving it as a named color (e.g., 'red')
-    const colorHex = colorNameToHex(hex);
-    if (colorHex && isHexColorValid(colorHex)) {
-      return hexToRgb(colorHex);
-    }
-    return null;
-  }
-
-  // Initialize with opaque black by default
-  const rgb: RgbColor = { r: 0, g: 0, b: 0, a: 1 };
-
-  if (hex[0] === "#") {
-    // Handle short formats: #RGB (4 chars) or #RGBA (5 chars)
-    if (hex.length === 4 || hex.length === 5) {
-      const red = hex[1];
-      const green = hex[2];
-      const blue = hex[3];
-      const alpha = hex[4]; // might be undefined for #RGB
-
-      if (!red || !green || !blue) throw new Error("Invalid hex color");
-
-      rgb.r = parseInt(red + red, 16);
-      rgb.g = parseInt(green + green, 16);
-      rgb.b = parseInt(blue + blue, 16);
-
-      if (alpha) {
-        rgb.a = parseInt(alpha + alpha, 16) / 255;
-      }
-      return rgb;
-    }
-
-    // Handle standard formats: #RRGGBB (7 chars) or #RRGGBBAA (9 chars)
-    if (hex.length === 7 || hex.length === 9) {
-      const red = hex.substring(1, 3);
-      const green = hex.substring(3, 5);
-      const blue = hex.substring(5, 7);
-      const alpha = hex.length === 9 ? hex.substring(7, 9) : null;
-
-      rgb.r = parseInt(red, 16);
-      rgb.g = parseInt(green, 16);
-      rgb.b = parseInt(blue, 16);
-
-      if (alpha) {
-        rgb.a = parseInt(alpha, 16) / 255;
-      }
-      return rgb;
-    }
-  }
-
-  return null;
+const colorNameToHex = (colorName: string): HexColor | null => {
+  if (typeof document === "undefined") return null;
+  const ctx = document.createElement("canvas");
+  const context = ctx.getContext("2d");
+  if (!context) return null;
+  context.fillStyle = colorName;
+  const returnedColor = context.fillStyle;
+  ctx.remove();
+  return returnedColor;
 };
 
 /**
- * Converts an RGB color object into a hexadecimal string representation.
- * Necessary for storing colors in a standard format that CSS and APIs understand.
- *
- * @param rgb - The RGB object containing channel values (0-255).
- * @returns A 7-character hex string (e.g., "#00ff00").
- */
-export const rgbToHex = (rgb: RgbColor): HexColor => {
-  const { r, g, b, a } = rgb;
-
-  // If alpha is 0, we treat it as fully transparent, often represented by transparent black
-  if (a === 0) return "#00000000";
-
-  // Use toString(16) to get hex and padStart to ensure 2 digits
-  // padStart is critical because toString(16) returns 'f' for 15, but hex expects '0f'
-  const redHex = r.toString(16).padStart(2, "0");
-  const greenHex = g.toString(16).padStart(2, "0");
-  const blueHex = b.toString(16).padStart(2, "0");
-
-  return `#${redHex}${greenHex}${blueHex}`;
-};
-
-/**
- * Transforms an RGB color to the HSV (Hue, Saturation, Value) model.
- * HSV is required for the visual UI of the color picker (Hue slider and Saturation/Value map)
- * because it aligns more closely with how humans perceive and manipulate color.
- *
- * @param rgb - The source RGB color.
- * @returns The converted HSV color object.
- */
-export const rgbToHsv = (rgb: RgbColor): HsvColor => {
-  const { r, g, b, a } = rgb;
-
-  // Normalize RGB values to [0, 1] range for the standard conversion algorithm
-  const rNorm = r / 255;
-  const gNorm = g / 255;
-  const bNorm = b / 255;
-
-  const max = Math.max(rNorm, gNorm, bNorm);
-  const min = Math.min(rNorm, gNorm, bNorm);
-  const delta = max - min;
-
-  let h = 0;
-  // Calculate Hue based on which channel is dominant (sector logic)
-  if (delta !== 0) {
-    if (max === rNorm) {
-      h = ((gNorm - bNorm) / delta) % 6;
-    } else if (max === gNorm) {
-      h = (bNorm - rNorm) / delta + 2;
-    } else {
-      h = (rNorm - gNorm) / delta + 4;
-    }
-    h *= 60; // Convert to degrees [0, 360]
-    if (h < 0) h += 360; // Normalize negative angles
-  }
-
-  // Saturation is the ratio of color intensity relative to brightness (max channel)
-  const s = max === 0 ? 0 : delta / max;
-
-  // Value represents the maximum component (brightness)
-  const v = max;
-
-  // Returning HSV in standard ranges, though alpha is preserved from RGB
-  return { h, s, v, a };
-};
-
-/**
- * Converts an HSV color object back to RGB.
- * We need this to update the underlying RGB/Hex state when a user interacts
- * with the HSV-based visual pickers.
- *
- * @param hsv - The HSV color to convert.
- * @returns The resulting RGB color.
- */
-export const hsvToRgb = (hsv: HsvColor): RgbColor => {
-  const { h, s, v, a } = hsv;
-
-  // Standard HSV to RGB conversion using chroma/piecewise function logic
-  const c = v * s; // Chroma: the "colorfulness"
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-  const m = v - c; // Matching value to adjust brightness
-
-  let rPrime = 0;
-  let gPrime = 0;
-  let bPrime = 0;
-
-  // Determine which sector of the color wheel the hue falls into
-  if (h >= 0 && h < 60) {
-    rPrime = c;
-    gPrime = x;
-    bPrime = 0;
-  } else if (h >= 60 && h < 120) {
-    rPrime = x;
-    gPrime = c;
-    bPrime = 0;
-  } else if (h >= 120 && h < 180) {
-    rPrime = 0;
-    gPrime = c;
-    bPrime = x;
-  } else if (h >= 180 && h < 240) {
-    rPrime = 0;
-    gPrime = x;
-    bPrime = c;
-  } else if (h >= 240 && h < 300) {
-    rPrime = x;
-    gPrime = 0;
-    bPrime = c;
-  } else if (h >= 300 && h < 360) {
-    rPrime = c;
-    gPrime = 0;
-    bPrime = x;
-  }
-
-  // Rescale and round to 8-bit integers (0-255)
-  const r = Math.round((rPrime + m) * 255);
-  const g = Math.round((gPrime + m) * 255);
-  const b = Math.round((bPrime + m) * 255);
-
-  return { r, g, b, a };
-};
-
-/**
- * Direct conversion from HSV to Hex format.
- * Provided for convenience when updating CSS attributes from picker state.
- *
- * @param hsv - The HSV color.
- * @returns The hex string.
- */
-export const hsvToHex = (hsv: HsvColor): HexColor => {
-  // Reuse existing pipelines to maintain consistency
-  const rgb = hsvToRgb(hsv);
-  return rgbToHex(rgb);
-};
-
-// --- OKLCH Utilities ---
-// OKLCH is a modern perceptually uniform color space.
-// Conversion path: RGB <-> Linear RGB <-> XYZ <-> OKLab <-> OKLCH
-
-/**
- * Converts sRGB (0-255) to Linear sRGB (0-1).
- * We need this because standard RGB is gamma-corrected, but math operations
- * require linear light values.
+ * Helper: Converts sRGB (0-255) to Linear sRGB (0-1).
  */
 const sRgbToLinear = (c: number): number => {
   const v = c / 255;
@@ -234,8 +38,7 @@ const sRgbToLinear = (c: number): number => {
 };
 
 /**
- * Converts Linear sRGB (0-1) back to gamma-corrected sRGB (0-255).
- * Needed to display OKLCH colors on standard digital screens.
+ * Helper: Converts Linear sRGB (0-1) back to gamma-corrected sRGB (0-255).
  */
 const linearToSRgb = (c: number): number => {
   const v = c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
@@ -243,165 +46,216 @@ const linearToSRgb = (c: number): number => {
 };
 
 /**
- * Converts an RGB color to the perceptually uniform OKLCH space.
- * Use this for high-quality gradients or when you need "natural" color adjustments.
- *
- * @param rgb - The source RGB color.
- * @returns The converted OKLCH object.
+ * The Solid Color Converter Class.
+ * Handles all color formats (Hex, RGB, HSV, OKLCH) through a single interface.
  */
-export const rgbToOklch = (rgb: RgbColor): OklchColor => {
-  const r = sRgbToLinear(rgb.r);
-  const g = sRgbToLinear(rgb.g);
-  const b = sRgbToLinear(rgb.b);
+export class Color {
+  private _rgb: RgbColor;
 
-  // Convert to LMS space (Long, Medium, Short cone responses)
-  const l_ = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
-  const m_ = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
-  const s_ = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
+  constructor(color: HexColor | RgbColor | HsvColor | OklchColor) {
+    const parsed = this.parseInput(color);
+    if (!parsed) {
+      throw new Error("Invalid color");
+    }
+    this._rgb = parsed;
+  }
 
-  const l_cube = Math.cbrt(l_);
-  const m_cube = Math.cbrt(m_);
-  const s_cube = Math.cbrt(s_);
+  /**
+   * Static factory method to create a Color instance.
+   */
+  static from(color: HexColor | RgbColor | HsvColor | OklchColor): Color {
+    return new Color(color);
+  }
 
-  // Convert to OKLab
-  const L =
-    0.2104542553 * l_cube + 0.793617785 * m_cube - 0.0040720401 * s_cube;
-  const a =
-    1.9779984951 * l_cube - 2.428592205 * m_cube + 0.4505937099 * s_cube;
-  const b_ =
-    0.0259040371 * l_cube + 0.7827717662 * m_cube - 0.808675766 * s_cube;
+  private parseInput(
+    color: HexColor | RgbColor | HsvColor | OklchColor,
+  ): RgbColor | null {
+    if (typeof color === "string") {
+      return this.hexToRgb(color);
+    }
+    if ("r" in color && "g" in color && "b" in color) {
+      return color as RgbColor;
+    }
+    if ("h" in color && "s" in color && "v" in color) {
+      return this.hsvToRgb(color as HsvColor);
+    }
+    if ("l" in color && "c" in color && "h" in color) {
+      return this.oklchToRgb(color as OklchColor);
+    }
+    return null;
+  }
 
-  // OKLab to OKLCH
-  const C = Math.sqrt(a * a + b_ * b_);
-  let h = Math.atan2(b_, a) * (180 / Math.PI);
-  if (h < 0) h += 360;
+  // --- Getters ---
+  get rgb(): RgbColor {
+    return { ...this._rgb };
+  }
+  get hex(): HexColor {
+    const { r, g, b, a } = this._rgb;
+    if (a === 0) return "#00000000";
+    const redHex = r.toString(16).padStart(2, "0");
+    const greenHex = g.toString(16).padStart(2, "0");
+    const blueHex = b.toString(16).padStart(2, "0");
+    return `#${redHex}${greenHex}${blueHex}`;
+  }
+  get hsv(): HsvColor {
+    const { r, g, b, a } = this._rgb;
+    const rNorm = r / 255;
+    const gNorm = g / 255;
+    const bNorm = b / 255;
 
-  return { l: L, c: C, h, a: rgb.a };
-};
+    const max = Math.max(rNorm, gNorm, bNorm);
+    const min = Math.min(rNorm, gNorm, bNorm);
+    const delta = max - min;
+
+    let h = 0;
+    if (delta !== 0) {
+      if (max === rNorm) {
+        h = ((gNorm - bNorm) / delta) % 6;
+      } else if (max === gNorm) {
+        h = (bNorm - rNorm) / delta + 2;
+      } else {
+        h = (rNorm - gNorm) / delta + 4;
+      }
+      h *= 60;
+      if (h < 0) h += 360;
+    }
+
+    const s = max === 0 ? 0 : delta / max;
+    const v = max;
+
+    return { h, s, v, a };
+  }
+  get oklch(): OklchColor {
+    const r = sRgbToLinear(this._rgb.r);
+    const g = sRgbToLinear(this._rgb.g);
+    const b = sRgbToLinear(this._rgb.b);
+
+    const l_ = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
+    const m_ = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
+    const s_ = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
+
+    const l_cube = Math.cbrt(l_);
+    const m_cube = Math.cbrt(m_);
+    const s_cube = Math.cbrt(s_);
+
+    const L =
+      0.2104542553 * l_cube + 0.793617785 * m_cube - 0.0040720401 * s_cube;
+    const a =
+      1.9779984951 * l_cube - 2.428592205 * m_cube + 0.4505937099 * s_cube;
+    const b_ =
+      0.0259040371 * l_cube + 0.7827717662 * m_cube - 0.808675766 * s_cube;
+
+    const C = Math.sqrt(a * a + b_ * b_);
+    let h = Math.atan2(b_, a) * (180 / Math.PI);
+    if (h < 0) h += 360;
+
+    return { l: L, c: C, h, a: this._rgb.a };
+  }
+
+  // --- Internal Converters ---
+
+  private hexToRgb(hex: HexColor): RgbColor | null {
+    if (!isHexColorValid(hex)) {
+      const colorHex = colorNameToHex(hex);
+      if (colorHex && isHexColorValid(colorHex)) {
+        return this.hexToRgb(colorHex);
+      }
+      return null;
+    }
+
+    const rgb: RgbColor = { r: 0, g: 0, b: 0, a: 1 };
+
+    if (hex[0] === "#") {
+      if (hex.length === 4 || hex.length === 5) {
+        const r = hex[1]!;
+        const g = hex[2]!;
+        const b = hex[3]!;
+        const a = hex[4];
+        rgb.r = parseInt(r + r, 16);
+        rgb.g = parseInt(g + g, 16);
+        rgb.b = parseInt(b + b, 16);
+        if (a) rgb.a = parseInt(a + a, 16) / 255;
+        return rgb;
+      }
+
+      if (hex.length === 7 || hex.length === 9) {
+        rgb.r = parseInt(hex.substring(1, 3), 16);
+        rgb.g = parseInt(hex.substring(3, 5), 16);
+        rgb.b = parseInt(hex.substring(5, 7), 16);
+        if (hex.length === 9) rgb.a = parseInt(hex.substring(7, 9), 16) / 255;
+        return rgb;
+      }
+    }
+
+    return null;
+  }
+
+  private hsvToRgb(hsv: HsvColor): RgbColor {
+    const { h, s, v, a } = hsv;
+    const c = v * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = v - c;
+
+    let rP = 0,
+      gP = 0,
+      bP = 0;
+    if (h >= 0 && h < 60) [rP, gP, bP] = [c, x, 0];
+    else if (h >= 60 && h < 120) [rP, gP, bP] = [x, c, 0];
+    else if (h >= 120 && h < 180) [rP, gP, bP] = [0, c, x];
+    else if (h >= 180 && h < 240) [rP, gP, bP] = [0, x, c];
+    else if (h >= 240 && h < 300) [rP, gP, bP] = [x, 0, c];
+    else if (h >= 300 && h < 360) [rP, gP, bP] = [c, 0, x];
+
+    return {
+      r: Math.round((rP + m) * 255),
+      g: Math.round((gP + m) * 255),
+      b: Math.round((bP + m) * 255),
+      a,
+    };
+  }
+
+  private oklchToRgb(oklch: OklchColor): RgbColor {
+    const { l: L, c: C, h: H, a } = oklch;
+    const hRad = H * (Math.PI / 180);
+    const a_ = Math.cos(hRad) * C;
+    const b_ = Math.sin(hRad) * C;
+
+    const l_cube = L + 0.3963377774 * a_ + 0.2158037573 * b_;
+    const m_cube = L - 0.1055613458 * a_ - 0.0638541728 * b_;
+    const s_cube = L - 0.0894841775 * a_ - 1.291485548 * b_;
+
+    const l_ = l_cube * l_cube * l_cube;
+    const m_ = m_cube * m_cube * m_cube;
+    const s_ = s_cube * s_cube * s_cube;
+
+    const r = +4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_;
+    const g = -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_;
+    const b = -0.0041960863 * l_ - 0.7034186147 * m_ + 1.707614701 * s_;
+
+    return {
+      r: linearToSRgb(r),
+      g: linearToSRgb(g),
+      b: linearToSRgb(b),
+      a,
+    };
+  }
+}
 
 /**
- * Converts OKLCH values back to standard RGB.
- * Essential for rendering OKLCH colors in environments that don't support
- * CSS `oklch()` yet or for internal color manipulation.
- *
- * @param oklch - The source OKLCH color.
- * @returns result RGB color.
- */
-export const oklchToRgb = (oklch: OklchColor): RgbColor => {
-  const { l: L, c: C, h: H, a } = oklch;
-
-  const hRad = H * (Math.PI / 180);
-  const a_ = Math.cos(hRad) * C;
-  const b_ = Math.sin(hRad) * C;
-
-  // OKLab to LMS
-  const l_cube = L + 0.3963377774 * a_ + 0.2158037573 * b_;
-  const m_cube = L - 0.1055613458 * a_ - 0.0638541728 * b_;
-  const s_cube = L - 0.0894841775 * a_ - 1.291485548 * b_;
-
-  const l_ = l_cube * l_cube * l_cube;
-  const m_ = m_cube * m_cube * m_cube;
-  const s_ = s_cube * s_cube * s_cube;
-
-  // LMS to Linear RGB
-  const r = +4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_;
-  const g = -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_;
-  const b = -0.0041960863 * l_ - 0.7034186147 * m_ + 1.707614701 * s_;
-
-  return {
-    r: linearToSRgb(r),
-    g: linearToSRgb(g),
-    b: linearToSRgb(b),
-    a,
-  };
-};
-
-/**
- * Unified entry point to parse any supported color format into a complete
- * ColorValue object. We need this to keep all internal representations in sync
- * regardless of how the user input the color.
- *
- * @param color - A string (Hex) or an object (RGB, HSV, or OKLCH).
- * @returns A complete ColorValue object or null on failure.
+ * Legacy support / Convenient short-hands
  */
 export const parseColor = (
   color: HexColor | HsvColor | RgbColor | OklchColor,
 ): ColorValue | null => {
-  // Logic: Identify input type, convert to RGB as a pivot, then populate everything.
-  const isHex = typeof color === "string";
-
-  if (isHex) {
-    const rgb = hexToRgb(color as HexColor);
-    if (!rgb) return null;
+  try {
+    const c = new Color(color);
     return {
-      hex: color as HexColor,
-      rgb,
-      hsv: rgbToHsv(rgb),
-      oklch: rgbToOklch(rgb),
+      hex: c.hex,
+      rgb: c.rgb,
+      hsv: c.hsv,
+      oklch: c.oklch,
     };
+  } catch {
+    return null;
   }
-
-  // Check for RGB
-  if ("r" in color && "g" in color && "b" in color) {
-    const rgb = color as RgbColor;
-    return {
-      hex: rgbToHex(rgb),
-      rgb,
-      hsv: rgbToHsv(rgb),
-      oklch: rgbToOklch(rgb),
-    };
-  }
-
-  // Check for HSV
-  if ("h" in color && "s" in color && "v" in color) {
-    const hsv = color as HsvColor;
-    const rgb = hsvToRgb(hsv);
-    return {
-      hex: rgbToHex(rgb),
-      rgb,
-      hsv,
-      oklch: rgbToOklch(rgb),
-    };
-  }
-
-  // Check for OKLCH
-  if ("l" in color && "c" in color && "h" in color) {
-    const oklch = color as OklchColor;
-    const rgb = oklchToRgb(oklch);
-    return {
-      hex: rgbToHex(rgb),
-      rgb,
-      hsv: rgbToHsv(rgb),
-      oklch,
-    };
-  }
-
-  return null;
-};
-
-/**
- * Resolves a CSS color name to its hexadecimal value using the browser's engine.
- * This allows us to support names like 'dodgerblue' without a heavy library or manual mapping.
- *
- * @param colorName - Common CSS color name string.
- * @returns The resolved hex color string or null if unresolvable.
- */
-const colorNameToHex = (colorName: string): HexColor | null => {
-  // Use a temporary canvas to let the browser resolve the CSS color string
-  // This is the most robust way to handle any valid CSS color name or format
-  if (typeof document === "undefined") return null; // Guard for SSR
-
-  const ctx = document.createElement("canvas");
-  const context = ctx.getContext("2d");
-  if (!context) return null;
-
-  // Setting fillStyle allows the internal CSS engine to parse the string
-  context.fillStyle = colorName;
-  const returndeColor = context.fillStyle;
-
-  // Cleanup to prevent memory leaks, though canvas is not in DOM yet
-  ctx.remove();
-
-  // Return the resolved fillStyle which the browser converts to hex or rgb
-  return returndeColor;
 };

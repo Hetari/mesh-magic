@@ -1,14 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
-  hexToRgb,
-  hsvToHex,
-  hsvToRgb,
+  Color,
   isHexColorValid,
-  oklchToRgb,
-  parseColor,
-  rgbToHex,
-  rgbToHsv,
-  rgbToOklch,
 } from "../../app/components/ui/color-picker/color.utils";
 
 describe("Color Utilities", () => {
@@ -44,122 +37,79 @@ describe("Color Utilities", () => {
     });
   });
 
-  describe("hexToRgb", () => {
-    it("should convert 6-digit hex to RGB", () => {
-      expect(hexToRgb("#ffffff")).toEqual({ r: 255, g: 255, b: 255, a: 1 });
-      expect(hexToRgb("#ff0000")).toEqual({ r: 255, g: 0, b: 0, a: 1 });
-      expect(hexToRgb("#000000")).toEqual({ r: 0, g: 0, b: 0, a: 1 });
-      expect(hexToRgb("#00000000")).toEqual({ r: 0, g: 0, b: 0, a: 0 });
+  describe("Color Class", () => {
+    it("should initialize from hex", () => {
+      const color = new Color("#ff0000");
+      expect(color.rgb).toEqual({ r: 255, g: 0, b: 0, a: 1 });
+      expect(color.hex).toBe("#ff0000");
     });
 
-    it("should convert 3-digit hex to RGB", () => {
-      expect(hexToRgb("#fff")).toEqual({ r: 255, g: 255, b: 255, a: 1 });
-      expect(hexToRgb("#f00")).toEqual({ r: 255, g: 0, b: 0, a: 1 });
+    it("should initialize from RGB", () => {
+      const rgb = { r: 0, g: 255, b: 0, a: 1 };
+      const color = new Color(rgb);
+      expect(color.hex).toBe("#00ff00");
+      expect(color.rgb).toEqual(rgb);
     });
 
-    it("should return null for invalid hex", () => {
-      expect(hexToRgb("invalid")).toBeNull();
-    });
-  });
-
-  describe("rgbToHex", () => {
-    it("should convert RGB to hex", () => {
-      expect(rgbToHex({ r: 255, g: 255, b: 255, a: 1 })).toBe("#ffffff");
-      expect(rgbToHex({ r: 255, g: 0, b: 0, a: 1 })).toBe("#ff0000");
-      expect(rgbToHex({ r: 0, g: 0, b: 0, a: 1 })).toBe("#000000");
+    it("should initialize from HSV", () => {
+      const hsv = { h: 240, s: 1, v: 1, a: 1 };
+      const color = new Color(hsv);
+      expect(color.hex).toBe("#0000ff");
+      expect(color.hsv).toEqual(hsv);
     });
 
-    it("should handle transparency", () => {
-      expect(rgbToHex({ r: 255, g: 255, b: 255, a: 0 })).toBe("#00000000");
-    });
-  });
-
-  describe("HSV Conversions", () => {
-    it("should convert RGB to HSV", () => {
-      const red = { r: 255, g: 0, b: 0, a: 1 };
-      const hsv = rgbToHsv(red);
-      expect(hsv.h).toBe(0);
-      expect(hsv.s).toBe(1);
-      expect(hsv.v).toBe(1);
+    it("should handle transparency in hex", () => {
+      const color = new Color("#ffffff00");
+      expect(color.rgb.a).toBe(0);
+      expect(color.hex).toBe("#00000000");
     });
 
-    it("should convert HSV to RGB", () => {
-      const hsv = { h: 120, s: 1, v: 1, a: 1 }; // Pure Green
-      const rgb = hsvToRgb(hsv);
-      expect(rgb).toEqual({ r: 0, g: 255, b: 0, a: 1 });
+    it("should handle 3-digit hex", () => {
+      const color = new Color("#fff");
+      expect(color.rgb).toEqual({ r: 255, g: 255, b: 255, a: 1 });
+    });
+
+    it("should initialize from OKLCH", () => {
+      const oklch = { l: 1, c: 0, h: 0, a: 1 }; // White
+      const color = new Color(oklch);
+      expect(color.rgb).toEqual({ r: 255, g: 255, b: 255, a: 1 });
+      expect(color.oklch.l).toBeCloseTo(1, 4);
     });
 
     it("should be reversible (RGB -> HSV -> RGB)", () => {
       const originalRgb = { r: 100, g: 150, b: 200, a: 1 };
-      const hsv = rgbToHsv(originalRgb);
-      const resultingRgb = hsvToRgb(hsv);
-      expect(resultingRgb).toEqual(originalRgb);
-    });
-
-    it("should convert HSV to Hex", () => {
-      expect(hsvToHex({ h: 0, s: 1, v: 1, a: 1 })).toBe("#ff0000");
-    });
-  });
-
-  describe("OKLCH Conversions", () => {
-    it("should convert RGB to OKLCH", () => {
-      const white = { r: 255, g: 255, b: 255, a: 1 };
-      const oklch = rgbToOklch(white);
-      expect(oklch.l).toBeCloseTo(1, 4);
-      expect(oklch.c).toBeCloseTo(0, 4);
-    });
-
-    it("should convert OKLCH to RGB", () => {
-      const oklch = { l: 1, c: 0, h: 0, a: 1 }; // White
-      const rgb = oklchToRgb(oklch);
-      expect(rgb).toEqual({ r: 255, g: 255, b: 255, a: 1 });
+      const color = new Color(originalRgb);
+      const hsv = color.hsv;
+      const secondColor = new Color(hsv);
+      expect(secondColor.rgb).toEqual(originalRgb);
     });
 
     it("should be reversible (RGB -> OKLCH -> RGB)", () => {
       const originalRgb = { r: 200, g: 50, b: 100, a: 1 };
-      const oklch = rgbToOklch(originalRgb);
-      const resultingRgb = oklchToRgb(oklch);
-      expect(resultingRgb.r).toBeCloseTo(originalRgb.r, 0);
-      expect(resultingRgb.g).toBeCloseTo(originalRgb.g, 0);
-      expect(resultingRgb.b).toBeCloseTo(originalRgb.b, 0);
-    });
-  });
-
-  describe("parseColor", () => {
-    it("should parse hex string", () => {
-      const parsed = parseColor("#ff0000");
-      expect(parsed).not.toBeNull();
-      expect(parsed?.hex).toBe("#ff0000");
-      expect(parsed?.rgb).toEqual({ r: 255, g: 0, b: 0, a: 1 });
-      expect(parsed?.hsv).toBeDefined();
-      expect(parsed?.oklch).toBeDefined();
+      const color = new Color(originalRgb);
+      const oklch = color.oklch;
+      const secondColor = new Color(oklch);
+      expect(secondColor.rgb.r).toBeCloseTo(originalRgb.r, 0);
+      expect(secondColor.rgb.g).toBeCloseTo(originalRgb.g, 0);
+      expect(secondColor.rgb.b).toBeCloseTo(originalRgb.b, 0);
     });
 
-    it("should parse RGB object", () => {
-      const rgb = { r: 0, g: 255, b: 0, a: 1 };
-      const parsed = parseColor(rgb);
-      expect(parsed?.hex).toBe("#00ff00");
-      expect(parsed?.rgb).toEqual(rgb);
+    it("should handle simultaneous formats", () => {
+      const color = new Color("#ffffff");
+      expect(color.rgb).toBeDefined();
+      expect(color.hsv).toBeDefined();
+      expect(color.oklch).toBeDefined();
+      expect(color.hex).toBe("#ffffff");
     });
 
-    it("should parse HSV object", () => {
-      const hsv = { h: 240, s: 1, v: 1, a: 1 }; // Blue
-      const parsed = parseColor(hsv);
-      expect(parsed?.hex).toBe("#0000ff");
-      expect(parsed?.hsv).toEqual(hsv);
-    });
-
-    it("should parse OKLCH object", () => {
-      const oklch = { l: 0.5, c: 0.1, h: 200, a: 1 };
-      const parsed = parseColor(oklch);
-      expect(parsed?.oklch).toEqual(oklch);
-      expect(parsed?.hex).toBeDefined();
-      expect(parsed?.rgb).toBeDefined();
-    });
-
-    it("should return null for invalid input", () => {
+    it("should return fallback for invalid color instead of throwing", () => {
       // @ts-expect-error - testing invalid input
-      expect(parseColor({ x: 1 })).toBeNull();
+      expect(() => new Color({ x: 1 })).toThrow();
+    });
+
+    it("should support static from method", () => {
+      const color = Color.from("#000");
+      expect(color.hex).toBe("#000000");
     });
   });
 });

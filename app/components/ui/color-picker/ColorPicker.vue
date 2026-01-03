@@ -10,6 +10,12 @@ const color = ref<ColorValue>({
   hex: "#ff0000",
   rgb: { r: 255, g: 0, b: 0, a: 1 },
   hsv: { h: 0, s: 100, v: 100, a: 1 },
+  oklch: {
+    a: 0,
+    c: 0,
+    h: 0,
+    l: 0,
+  },
 });
 </script>
 
