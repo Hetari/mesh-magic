@@ -1,22 +1,28 @@
 <script setup lang="ts">
-import ColorPickeRoot from "./ColorPickeRoot.vue";
+import ColorPickerRoot from "./ColorPickerRoot.vue";
 import ColorPickerBody from "./ColorPickerBody.vue";
 import ColorPickerPreview from "./ColorPickerPreview.vue";
 import ColorPickerHeader from "./ColorPickerHeader.vue";
-import type { ColorPickerContext, ProviderKey } from "./types";
+import ColorPickerInput from "./ColorPickerInput.vue";
+import type { ColorValue } from "./types";
 
-const color = ref("#fff");
-provide<ColorPickerContext, ProviderKey>("color-picker", {
-  color: color,
+const color = ref<ColorValue>({
+  hex: "#ff0000",
+  rgb: { r: 255, g: 0, b: 0, a: 1 },
+  hsv: { h: 0, s: 100, v: 100, a: 1 },
 });
 </script>
 
 <template>
   <!-- <ClientOnly> -->
-  <ColorPickeRoot>
+  color.hex:{{ color.hex }}
+
+  <ColorPickerRoot>
     <ColorPickerPreview />
     <ColorPickerBody>
-      <ColorPickerHeader v-model:color="color" />
+      <ColorPickerHeader>
+        <ColorPickerInput v-model="color.hex" class="w-24" />
+      </ColorPickerHeader>
 
       <!-- </ColorPickerHeader> -->
     </ColorPickerBody>
@@ -28,6 +34,6 @@ provide<ColorPickerContext, ProviderKey>("color-picker", {
         <ColorPickerHue />
         <ColorPickerAlpha />
         <ColorPickerInputs /> -->
-  </ColorPickeRoot>
+  </ColorPickerRoot>
   <!-- </ClientOnly> -->
 </template>
