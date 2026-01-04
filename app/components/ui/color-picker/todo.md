@@ -4,157 +4,7 @@
 
 ---
 
-## 🟢 EASY - Basic Color Picker
-
-Core features needed for a simple, functional color picker.
-
-### 1. Type Definitions (types.ts)
-
-- [x] **Basic Types**
-  - `RgbColor`: `{ r: number, g: number, b: number, a: number }`
-  - `HsvColor`: `{ h: number, s: number, v: number, a: number }`
-  - `ColorValue`: Combined color representation
-
-- [x] **Essential Props Interface**
-  - `pureColor`: Hex or rgba string value
-  - `format`: Output format (`"hex"` only for now)
-  - `class`: Custom CSS class
-
-- [x] **Context Interface**
-  - Basic state: `hue`, `saturation`, `brightness`, `alpha`
-  - Basic actions: `setColor`, `setHue`, `setSaturationBrightness`, `setAlpha`
-
-- [x] **Injection Key**
-  - Export `COLOR_PICKER_KEY`
-
----
-
-### 2. Color Utilities (colorUtils.ts)
-
-- [x] **isHexColorValid(hex)**
-  - Validate hex color string
-
-- [x] **hexToRgb(hex)**
-  - Parse #RGB or #RRGGBB to RGB object
-
-- [x] **rgbToHex(rgb)**
-  - Convert RGB to hex string
-
-- [x] **rgbToHsv(rgb)**
-  - Convert RGB to HSV for picker
-
-- [x] **hsvToRgb(hsv)**
-  - Convert HSV back to RGB
-
-- [x] **hsvToHex(h, s, v, a)**
-  - Direct HSV to hex conversion
-
-- [x] **parseColor(colorString)**
-  - Parse hex string to ColorValue
-
----
-
-### 3. Saturation Picker (ColorPickerSaturation.vue)
-
-- [ ] **Template**
-  - Div container with hue-based background
-  - White gradient overlay (left→right)
-  - Black gradient overlay (bottom→top)
-  - Circular pointer marker
-
-- [ ] **Mouse Drag**
-  - Track mouse position on click
-  - Update saturation (X) and brightness (Y)
-  - Handle mousedown, mousemove, mouseup
-
-- [ ] **Pointer Position**
-  - Compute left/top from saturation/brightness values
-
----
-
-### 4. Hue Slider (ColorPickerHue.vue)
-
-- [ ] **Template**
-  - Horizontal bar with rainbow gradient
-  - Circular pointer marker
-
-- [ ] **Mouse Drag**
-  - Calculate hue (0-360) from X position
-
-- [ ] **Rainbow Gradient**
-  ```css
-  background: linear-gradient(
-    to right,
-    #ff0000 0%,
-    #ffff00 17%,
-    #00ff00 33%,
-    #00ffff 50%,
-    #0000ff 67%,
-    #ff00ff 83%,
-    #ff0000 100%
-  );
-  ```
-
----
-
-### 5. Color Input (ColorPickerInput.vue)
-
-- [ ] **Hex Input Field**
-  - Text input with "#" prefix
-  - Validate with `isHexColorValid()`
-  - Update color on valid input
-
----
-
-### 6. Preview Button (ColorPickerPreview.vue)
-
-- [ ] **Trigger Button**
-  - Show current color as background
-  - Open/close popover on click
-
----
-
-### 7. Main Component (ColorPicker.vue)
-
-- [ ] **Props**
-  - `pureColor`: Initial color value
-  - `format`: Output format (default: "hex")
-
-- [ ] **State**
-  - Internal `hue`, `saturation`, `brightness`, `alpha`
-  - Computed `colorValue` from HSV
-
-- [ ] **Provide Context**
-  - Share state and actions with children
-
-- [ ] **Template**
-  - ColorPickerPreview (trigger)
-  - Popover with saturation, hue slider, input
-
-- [ ] **Events**
-  - `update:pureColor` for v-model support
-
----
-
-### 8. Root & Body (ColorPickerRoot.vue, ColorPickerBody.vue)
-
-- [ ] **Root**
-  - Wrap content in Popover component
-  - Handle open/close state
-
-- [ ] **Body**
-  - PopoverContent with styling
-  - Flex column layout
-
----
-
-### 9. Exports (index.ts)
-
-- [ ] Export all components and utilities
-
----
-
-## 🟡 MEDIUM - Enhanced Features
+##  MEDIUM - Enhanced Features
 
 Additional features for a better user experience.
 
@@ -218,12 +68,6 @@ Additional features for a better user experience.
 
 ### 4. Additional Props
 
-- [ ] **shape** (`"circle" | "square"`)
-  - Preview button shape
-
-- [ ] **disableAlpha** (boolean)
-  - Hide alpha slider and input
-
 - [ ] **disableHistory** (boolean)
   - Hide color swatches
 
@@ -261,9 +105,6 @@ Additional features for a better user experience.
 
 - [ ] **rgbToHsl(rgb)** & **hslToRgb(hsl)**
   - HSL color space conversions
-
-- [ ] **formatColor(value, format)**
-  - Format output as hex, rgb, rgba, hsl, hsla
 
 - [ ] **getCheckeredBg()**
   - Return CSS for checkered pattern
@@ -468,25 +309,13 @@ Complex features requiring more implementation effort.
 
 ## Implementation Order
 
-### Phase 1: Easy (Core)
-
-1. types.ts - Basic types
-2. colorUtils.ts - Hex/RGB/HSV conversions
-3. ColorPickerSaturation.vue
-4. ColorPickerHue.vue
-5. ColorPickerInput.vue
-6. ColorPickerPreview.vue
-7. ColorPickerRoot.vue + ColorPickerBody.vue
-8. ColorPicker.vue - Compose everything
-9. index.ts - Exports
-
 ### Phase 2: Medium (Enhanced)
 
 1. ColorPickerAlpha.vue
 2. ColorPickerInputs.vue (full version)
 3. ColorPickerSwatches.vue
 4. Touch & keyboard support
-5. Additional props (shape, disableAlpha, etc.)
+5. Additional props (debounce, etc.)
 6. Accessibility improvements
 
 ### Phase 3: Hard (Advanced)
@@ -513,13 +342,13 @@ app/components/ui/color-picker/
 ├── ColorPickerRoot.vue         # Root wrapper
 ├── ColorPickerBody.vue         # Popover body
 ├── ColorPickerPreview.vue      # Trigger button
-├── ColorPickerSaturation.vue   # 2D picker [EASY]
-├── ColorPickerHue.vue          # Hue slider [EASY]
-├── ColorPickerInput.vue        # Hex input [EASY]
-├── ColorPickerAlpha.vue        # Alpha slider [MEDIUM]
-├── ColorPickerInputs.vue       # RGB inputs [MEDIUM]
-├── ColorPickerSwatches.vue     # History [MEDIUM]
-├── ColorPickerHeader.vue       # Mode tabs [HARD]
-├── ColorPickerGradient.vue     # Gradient editor [HARD]
+├── ColorPickerSaturation.vue   # 2D picker
+├── ColorPickerHue.vue          # Hue slider
+├── ColorPickerInput.vue        # Smart input
+├── ColorPickerAlpha.vue        # Alpha slider [PENDING]
+├── ColorPickerInputs.vue       # RGB inputs [PENDING]
+├── ColorPickerSwatches.vue     # History [PENDING]
+├── ColorPickerHeader.vue       # Mode tabs [PENDING]
+├── ColorPickerGradient.vue     # Gradient editor [PENDING]
 └── todo.md                     # This file
 ```
