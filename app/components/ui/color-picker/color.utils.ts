@@ -58,17 +58,33 @@ export const isValidColor = (
   }
 };
 
+// Cache for color name to hex conversions
+const colorNameCache = new Map<string, HexColor>();
+
 /**
  * Resolves a CSS color name to its hexadecimal value using the browser's engine.
+ * Uses caching to avoid repeated canvas operations.
  */
 const colorNameToHex = (colorName: string): HexColor | null => {
   if (typeof document === "undefined") return null;
+  
+  const normalizedName = colorName.toLowerCase().trim();
+  if (colorNameCache.has(normalizedName)) {
+    return colorNameCache.get(normalizedName)!;
+  }
+  
   const ctx = document.createElement("canvas");
   const context = ctx.getContext("2d");
   if (!context) return null;
-  context.fillStyle = colorName;
-  const returnedColor = context.fillStyle;
+  context.fillStyle = normalizedName;
+  const returnedColor = context.fillStyle as HexColor;
   ctx.remove();
+  
+  // Only cache if it's a valid hex color
+  if (returnedColor && returnedColor.startsWith("#")) {
+    colorNameCache.set(normalizedName, returnedColor);
+  }
+  
   return returnedColor;
 };
 
@@ -317,19 +333,52 @@ export const parseToRgb = (
   return null;
 };
 
+// Cache for parsed colors (key is hex string)
+const parsedColorCache = new Map<string, ColorValue>();
+
 /**
  * Convenient short-hands
+ * Uses caching to avoid recomputing color conversions
  */
 export const parseColor = (
   color: HexColor | HsvColor | RgbColor | OklchColor | ColorValue,
 ): ColorValue => {
+  // If already a ColorValue, return as-is
+  if (typeof color === "object" && "hex" in color && "rgb" in color) {
+    return color;
+  }
+
+  // Try to get cached value
+  let cacheKey: string | null = null;
+  if (typeof color === "string") {
+    cacheKey = color.toLowerCase().trim();
+    if (parsedColorCache.has(cacheKey)) {
+      return parsedColorCache.get(cacheKey)!;
+    }
+  } else if ("r" in color && "g" in color && "b" in color) {
+    // RGB object - use hex as cache key
+    cacheKey = rgbToHex(color as RgbColor);
+    if (parsedColorCache.has(cacheKey)) {
+      return parsedColorCache.get(cacheKey)!;
+    }
+  }
+
   const rgb = parseToRgb(color) ?? { r: 0, g: 0, b: 0, a: 1 };
-  return {
-    hex: rgbToHex(rgb),
+  const hex = rgbToHex(rgb);
+  const result: ColorValue = {
+    hex,
     rgb: { ...rgb },
     hsv: rgbToHsv(rgb),
     oklch: rgbToOklch(rgb),
   };
+
+  // Cache the result using hex as key
+  if (cacheKey) {
+    parsedColorCache.set(cacheKey, result);
+  }
+  parsedColorCache.set(hex, result);
+
+  return result;
 };
 
 /**

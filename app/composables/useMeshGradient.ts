@@ -3,6 +3,7 @@ import type { ColorValue } from "~/components/ui/color-picker/types";
 import { themes } from "~/utils/themes";
 
 const BASE_COLOR = "#020617";
+const DEFAULT_LAYER_COUNT = 4;
 
 /* Types */
 export type Layer = {
@@ -20,13 +21,6 @@ export type MeshConfig = {
   layers: Layer[];
 };
 
-type Region =
-  | "top-left"
-  | "top-right"
-  | "bottom-left"
-  | "bottom-right"
-  | "center";
-
 /* Helpers */
 export const randomHex = () =>
   `#${Math.floor(Math.random() * 16777215)
@@ -41,62 +35,57 @@ const generateOrganicRadius = () => {
   return `${r()} ${r()} ${r()} ${r()} / ${r()} ${r()} ${r()} ${r()}`;
 };
 
-const randomRegion = (): Region => {
-  const regions: Region[] = [
-    "top-left",
-    "top-right",
-    "bottom-left",
-    "bottom-right",
-    "center",
-  ];
-  return regions[Math.floor(Math.random() * regions.length)] as Region;
-};
+// Generate unique layer IDs using timestamp + random for uniqueness
+const generateLayerId = () =>
+  Date.now() * 1000 + Math.floor(Math.random() * 1000);
 
-const randomPositionByRegion = () => {
-  switch (randomRegion()) {
-    case "top-left":
-      return { x: rand(5, 35), y: rand(5, 35) };
-    case "top-right":
-      return { x: rand(65, 95), y: rand(5, 35) };
-    case "bottom-left":
-      return { x: rand(5, 35), y: rand(65, 95) };
-    case "bottom-right":
-      return { x: rand(65, 95), y: rand(65, 95) };
-    case "center":
-    default:
-      return { x: rand(35, 65), y: rand(35, 65) };
-  }
-};
-
-const makeLayer = (color?: ColorValue): Layer => {
-  const { x, y } = randomPositionByRegion();
+const makeLayer = (color?: ColorValue, baseX?: number, baseY?: number): Layer => {
+  // Simple random positioning like the old demo (0-80 range)
+  // If baseX/baseY provided, use them with slight variation (±5)
+  const x = baseX !== undefined 
+    ? Math.max(0, Math.min(100, baseX + rand(-5, 5)))
+    : Math.floor(Math.random() * 80);
+  const y = baseY !== undefined
+    ? Math.max(0, Math.min(100, baseY + rand(-5, 5)))
+    : Math.floor(Math.random() * 80);
 
   return {
-    id: Date.now() + Math.random(),
+    id: generateLayerId(),
     color: color ?? parseColor(randomHex()),
     x: [x],
     y: [y],
-    size: rand(40, 50),
-    blur: [rand(80, 90)],
+    size: rand(50, 90), // Like old demo: Math.floor(Math.random() * 40 + 50)
+    blur: [rand(80, 180)], // Like old demo: Math.floor(Math.random() * 100 + 80)
     borderRadius: generateOrganicRadius(),
   };
 };
 
-const config = ref<MeshConfig>({
-  baseColor: parseColor(BASE_COLOR),
-  layers:
-    themes.cosmic?.map((c) => ({
-      id: Math.random() + Date.now(),
-      color: c,
-      x: [rand(35, 65)],
-      y: [rand(35, 65)],
-      size: rand(40, 50),
-      blur: [rand(80, 90)],
-      borderRadius: generateOrganicRadius(),
-    })) ?? [],
-});
+// Generate 4 random layers for initial state
+// All layers positioned in the same area (same base position with slight variations)
+const generateInitialLayers = (): Layer[] => {
+  const baseColors = themes.cosmic ?? [];
+  const layers: Layer[] = [];
+  
+  // Choose one random base position for all layers (like the old demo: 0-80 range)
+  const baseX = Math.floor(Math.random() * 80);
+  const baseY = Math.floor(Math.random() * 80);
+
+  for (let i = 0; i < DEFAULT_LAYER_COUNT; i++) {
+    const color = baseColors[i] ?? parseColor(randomHex());
+    layers.push(makeLayer(color, baseX, baseY));
+  }
+
+  return layers;
+};
 
 export function useMeshGradient() {
+  // Use useState for SSR-safe state - ensures same state on server and client
+  // The initializer runs only once (on server or first client render)
+  const config = useState<MeshConfig>("mesh-gradient-config", () => ({
+    baseColor: parseColor(BASE_COLOR),
+    layers: generateInitialLayers(),
+  }));
+
   const addLayer = (color?: ColorValue) => {
     config.value.layers.push(makeLayer(color));
   };
@@ -108,7 +97,7 @@ export function useMeshGradient() {
   const duplicateLayer = (index: number) => {
     const source = config.value.layers[index];
     if (!source) return;
-    const dup = { ...source, id: Date.now() + Math.random() };
+    const dup = { ...source, id: generateLayerId() };
     config.value.layers.splice(index + 1, 0, dup);
   };
 
@@ -140,13 +129,7 @@ export function useMeshGradient() {
 
   const reset = (defaultBase = BASE_COLOR) => {
     config.value.baseColor = parseColor(defaultBase);
-    if (themes.cosmic) {
-      config.value.layers = (themes.cosmic as ColorValue[]).map((c) =>
-        makeLayer(c),
-      );
-    } else {
-      randomize(3, 7);
-    }
+    config.value.layers = generateInitialLayers();
   };
 
   return {

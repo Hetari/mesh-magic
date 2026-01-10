@@ -63,7 +63,11 @@ const {
               <div
                 class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
               >
-                <HugeiconsIcon :icon="ColorsIcon" class="size-5" />
+                <HugeiconsIcon
+                  fetchpriority="high"
+                  :icon="ColorsIcon"
+                  class="size-5"
+                />
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold">Mesh Gradient</span>
@@ -113,114 +117,101 @@ const {
             </SidebarGroupLabel>
 
             <SidebarGroupContent class="space-y-4">
-              <Accordion type="multiple" collapsible default-value="layer-1">
-                <TransitionGroup class="space-y-2" name="fade" tag="div">
-                  <AccordionItem
-                    v-for="(layer, index) in config.layers"
-                    :key="layer.id"
-                    :value="`layer-${index + 1}`"
-                    class="border last:border-b-2"
+              <Accordion type="multiple" class="space-y-2" collapsible default-value="layer-1">
+                <AccordionItem
+                  v-for="(layer, index) in config.layers"
+                  :key="layer.id"
+                  :value="`layer-${index + 1}`"
+                  class="border last:border-b-2"
+                >
+                  <!-- HEADER -->
+                  <AccordionTrigger
+                    class="p-2 hover:cursor-pointer hover:no-underline!"
                   >
-                    <ClientOnly>
-                      <template #placeholder>
-                        <div class="p-2">
-                          <Skeleton class="h-16 w-full" />
-                        </div>
-                      </template>
+                    <span class="text-sm font-medium"> Layer </span>
+                  </AccordionTrigger>
 
-                      <!-- HEADER -->
-                      <AccordionTrigger
-                        class="p-2 hover:cursor-pointer hover:no-underline!"
+                  <AccordionContent class="space-y-4 p-2">
+                    <div class="flex items-center gap-2">
+                      <ColorPicker v-model="layer.color" />
+                      <Input v-model="layer.color.hex" class="h-8 text-xs" />
+                    </div>
+
+                    <div class="space-y-1">
+                      <div
+                        class="text-muted-foreground flex justify-between text-xs"
                       >
-                        <span class="text-sm font-medium"> Layer </span>
-                      </AccordionTrigger>
+                        <span>Position X</span>
+                        <span>{{ layer.x[0] }}%</span>
+                      </div>
 
-                      <AccordionContent class="space-y-4 p-2">
-                        <div class="flex items-center gap-2">
-                          <ColorPicker v-model="layer.color" />
-                          <Input
-                            v-model="layer.color.hex"
-                            class="h-8 text-xs"
-                          />
-                        </div>
+                      <Slider
+                        v-model="config!.layers![index]!.x"
+                        :min="0"
+                        :max="100"
+                      />
+                    </div>
 
-                        <div class="space-y-1">
-                          <div
-                            class="text-muted-foreground flex justify-between text-xs"
-                          >
-                            <span>Position X</span>
-                            <span>{{ layer.x[0] }}%</span>
-                          </div>
+                    <div class="space-y-1">
+                      <div
+                        class="text-muted-foreground flex justify-between text-xs"
+                      >
+                        <span>Position Y</span>
+                        <span>{{ layer.y[0] }}%</span>
+                      </div>
+                      <Slider
+                        v-model="config!.layers![index]!.y"
+                        :min="0"
+                        :max="100"
+                      />
+                    </div>
 
-                          <Slider
-                            v-model="config!.layers![index]!.x"
-                            :min="0"
-                            :max="100"
-                          />
-                        </div>
+                    <div class="space-y-1">
+                      <div
+                        class="text-muted-foreground flex justify-between text-xs"
+                      >
+                        <span>Blur Size</span>
+                        <span>{{ layer.blur[0] }}px</span>
+                      </div>
+                      <Slider
+                        v-model="config!.layers![index]!.blur"
+                        :min="0"
+                        :max="200"
+                      />
+                    </div>
 
-                        <div class="space-y-1">
-                          <div
-                            class="text-muted-foreground flex justify-between text-xs"
-                          >
-                            <span>Position Y</span>
-                            <span>{{ layer.y[0] }}%</span>
-                          </div>
-                          <Slider
-                            v-model="config!.layers![index]!.y"
-                            :min="0"
-                            :max="100"
-                          />
-                        </div>
+                    <div class="flex w-full flex-wrap gap-1">
+                      <Button
+                        class="flex-1 cursor-copy"
+                        variant="outline"
+                        size="sm"
+                        @click="duplicateLayer(index)"
+                      >
+                        <HugeiconsIcon :icon="RepeatOne02Icon" />
+                        <span class="text-xs">Duplicate</span>
+                      </Button>
 
-                        <div class="space-y-1">
-                          <div
-                            class="text-muted-foreground flex justify-between text-xs"
-                          >
-                            <span>Blur Size</span>
-                            <span>{{ layer.blur[0] }}px</span>
-                          </div>
-                          <Slider
-                            v-model="config!.layers![index]!.blur"
-                            :min="0"
-                            :max="200"
-                          />
-                        </div>
+                      <Button
+                        class="flex-1 cursor-pointer"
+                        variant="outline"
+                        size="sm"
+                      >
+                        <HugeiconsIcon :icon="Copy01Icon" />
+                        <span class="text-xs">CSS</span>
+                      </Button>
 
-                        <div class="flex w-full flex-wrap gap-1">
-                          <Button
-                            class="flex-1 cursor-copy"
-                            variant="outline"
-                            size="sm"
-                            @click="duplicateLayer(index)"
-                          >
-                            <HugeiconsIcon :icon="RepeatOne02Icon" />
-                            <span class="text-xs">Duplicate</span>
-                          </Button>
-
-                          <Button
-                            class="flex-1 cursor-pointer"
-                            variant="outline"
-                            size="sm"
-                          >
-                            <HugeiconsIcon :icon="Copy01Icon" />
-                            <span class="text-xs">CSS</span>
-                          </Button>
-
-                          <Button
-                            class="flex-1 cursor-pointer"
-                            variant="destructive"
-                            size="sm"
-                            @click="removeLayer(index)"
-                          >
-                            <HugeiconsIcon :icon="Delete02Icon" />
-                            <span class="text-xs">Delete</span>
-                          </Button>
-                        </div>
-                      </AccordionContent>
-                    </ClientOnly>
-                  </AccordionItem>
-                </TransitionGroup>
+                      <Button
+                        class="flex-1 cursor-pointer"
+                        variant="destructive"
+                        size="sm"
+                        @click="removeLayer(index)"
+                      >
+                        <HugeiconsIcon :icon="Delete02Icon" />
+                        <span class="text-xs">Delete</span>
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
               </Accordion>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -259,31 +250,9 @@ const {
       <SidebarTrigger
         class="text-sidebar-primary-foreground absolute top-4 left-4 z-10 -ml-1 shadow"
       />
-      <div class="flex flex-1 flex-col overflow-clip">
+      <div class="flex min-h-screen flex-1 flex-col overflow-clip">
         <slot />
       </div>
     </SidebarInset>
   </SidebarProvider>
 </template>
-
-<style>
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(30px);
-}
-
-.fade-move {
-  transition: transform 0.3s ease;
-}
-
-.fade-leave-active {
-  position: absolute;
-  width: calc(100% - 2rem); /* Adjusted for sidebar padding if needed */
-}
-</style>
