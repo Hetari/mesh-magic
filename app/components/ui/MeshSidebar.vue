@@ -5,7 +5,6 @@ import {
   Copy01Icon,
   Delete02Icon,
   LayersIcon,
-  Loader,
   Plus,
   Recycle03Icon,
   RepeatOne02Icon,
