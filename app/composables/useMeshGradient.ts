@@ -150,7 +150,6 @@ export function useMeshGradient() {
   const copyTextLayer = async (layer: Layer) => {
     const x = layer.x?.[0] ?? 0;
     const y = layer.y?.[0] ?? 0;
-    const blur = layer.blur?.[0] ?? 0;
     const size = layer.size ?? 64;
     const colorHex = (layer.color?.hex ?? "#000000").toLowerCase();
     // Tailwind arbitrary brackets can't contain spaces in the class name, so replace spaces w/ underscores
@@ -178,6 +177,18 @@ export function useMeshGradient() {
     });
   };
 
+  const copyMeshCSS = async () => {
+    const meshElemnt = document.getElementById("mesh-gradient");
+    if (!meshElemnt) return;
+
+    const fullCSS = meshElemnt.getHTML();
+    await copyTextClient(fullCSS);
+    toast("Copied", {
+      description: "Mesh CSS copied to clipboard",
+      richColors: true,
+    });
+  };
+
   return {
     config,
     addLayer,
@@ -188,5 +199,6 @@ export function useMeshGradient() {
     applyTheme,
     reset,
     copyTextLayer,
+    copyMeshCSS,
   };
 }

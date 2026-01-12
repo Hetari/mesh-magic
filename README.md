@@ -28,7 +28,7 @@ A beautiful and intuitive mesh gradient generator built with Nuxt 4. Create stun
 
 ### Mesh Gradient
 
-- [ ] Add copy CSS functionality
+- [x] Add copy CSS functionality
 - [ ] Add copy SVG functionality
 - [ ] Add path changer for custom shapes
 - [ ] Add z-index control for layers

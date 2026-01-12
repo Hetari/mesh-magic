@@ -7,6 +7,7 @@ defineEmits<{
 </script>
 <template>
   <div
+    id="mesh-gradient"
     class="relative size-full"
     :style="{ backgroundColor: config.baseColor.hex }"
   >

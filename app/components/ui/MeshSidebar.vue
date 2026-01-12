@@ -5,6 +5,7 @@ import {
   Copy01Icon,
   Delete02Icon,
   LayersIcon,
+  PaintBoardIcon,
   Plus,
   Recycle03Icon,
   RepeatOne02Icon,
@@ -52,6 +53,7 @@ const {
   removeLayer,
   reset,
   copyTextLayer,
+  copyMeshCSS,
 } = useMeshGradient();
 
 const setNewLayerCount = (v: number) => {
@@ -133,7 +135,7 @@ const setNewLayerCount = (v: number) => {
             <SidebarGroupLabel>{{ section.title }}</SidebarGroupLabel>
             <SidebarGroupContent class="grid grid-cols-3 gap-2">
               <SidebarMenuButton
-                v-for="(theme, name) in themes"
+                v-for="(_, name) in themes"
                 :key="name"
                 class="justify-center"
                 as-child
@@ -295,10 +297,31 @@ const setNewLayerCount = (v: number) => {
 
       <SidebarRail />
     </Sidebar>
-    <SidebarInset>
-      <SidebarTrigger
-        class="text-sidebar-primary-foreground absolute top-4 left-4 z-10 -ml-1 shadow"
-      />
+    <SidebarInset class="relative">
+      <div class="relative">
+        <SidebarTrigger
+          class="text-sidebar-primary-foreground absolute top-4 left-4 z-10 -ml-1 shadow"
+        />
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger as-child>
+              <Button
+                data-sidebar="trigger"
+                data-slot="sidebar-trigger"
+                variant="ghost"
+                size="icon"
+                class="text-sidebar-primary-foreground absolute top-4 left-12 z-10 -ml-1 size-7 shadow"
+                @click="copyMeshCSS"
+              >
+                <HugeiconsIcon :icon="PaintBoardIcon" />
+                <span class="sr-only">Toggle Sidebar</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Copy Mesh CSS</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
       <div class="flex min-h-dvh flex-1 flex-col overflow-clip">
         <slot />
       </div>
