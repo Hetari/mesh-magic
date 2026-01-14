@@ -26,7 +26,7 @@ defineEmits<{
 
     <!-- Grain Texture Overlay -->
     <div
-      class="pointer-events-none absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15] mix-blend-overlay"
+      class="pointer-events-none absolute inset-0 bg-[url('/noise.svg')] opacity-[0.15] mix-blend-overlay"
     />
   </div>
 </template>

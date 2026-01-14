@@ -92,6 +92,8 @@ watch(isHover, (hover) => {
 
 <template>
   <Button
+    aria-label="mode-toggle-button"
+    aria-labelledby="mode-toggle-button"
     variant="secondary"
     size="icon"
     class="cursor-pointer"

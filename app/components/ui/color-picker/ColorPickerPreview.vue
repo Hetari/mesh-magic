@@ -23,6 +23,7 @@ const hex = computed(() => {
   <PopoverTrigger as-child :disabled="disabled">
     <Button
       aria-label="Select Color"
+      aria-labelledby="Select Color"
       aria-haspopup="dialog"
       :aria-expanded="open"
       variant="outline"

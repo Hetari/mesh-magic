@@ -66,11 +66,15 @@ const onDownloadImage = () => {
         <!-- Type Selection -->
         <div class="flex gap-2">
           <Button
+            aria-label="linear-gradient-button"
+            aria-labelledby="linear-gradient-button"
             :variant="config.type === 'linear' ? 'default' : 'outline'"
             @click="config.type = 'linear'"
             >Linear</Button
           >
           <Button
+            aria-label="radial-gradient-button"
+            aria-labelledby="radial-gradient-button"
             :variant="config.type === 'radial' ? 'default' : 'outline'"
             @click="config.type = 'radial'"
             >Radial</Button

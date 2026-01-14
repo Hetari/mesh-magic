@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, nextTick } from "vue";
 import { toast } from "vue-sonner";
 import { parseColor } from "~/components/ui/color-picker/color.utils";
 import type { ColorValue } from "~/components/ui/color-picker/types";
@@ -184,12 +184,20 @@ export function useMeshGradient() {
     const element = document.getElementById("mesh-gradient");
     if (!element) return;
 
+    // Get the current origin/base URL for the noise.svg
+    const baseUrl = window.location.origin;
+    const noiseSvgUrl = `${baseUrl}/noise.svg`;
+
     // Get the HTML directly from the element
     element.classList.remove('size-full')
     element.classList.add('w-screen')
     element.classList.add('h-screen')
     element.classList.add('overflow-clip')
-    const html = element.outerHTML
+    let html = element.outerHTML;
+    
+    // Replace the relative noise.svg path with the full URL
+    html = html.replace(/url\(['"]?\/noise\.svg['"]?\)/g, `url('${noiseSvgUrl}')`);
+    
     await copyTextClient(html);
     toast("Copied", {
       description: "Mesh CSS copied to clipboard",
@@ -212,14 +220,18 @@ export function useMeshGradient() {
     const element = document.getElementById("mesh-gradient");
     if (!element) return;
 
+    // Wait for next tick to ensure element is fully rendered
+    await nextTick();
+
     const pixelRatio = window.devicePixelRatio || 1;
 
     const baseOptions = {
       width,
       height,
       pixelRatio,
-      backgroundColor: config.value.baseColor.hex,
       cacheBust: true,
+      useCORS: true,
+      allowTaint: true,
     };
 
     const rasterOptions = {

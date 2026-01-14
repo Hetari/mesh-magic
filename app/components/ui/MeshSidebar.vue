@@ -100,6 +100,8 @@ const downloadImageHeight = ref(600);
                 <template #placeholder>
                   <Button
                     as="svg"
+                    aria-label="mode-toggle-button-disabled"
+                    aria-labelledby="mode-toggle-button-disabled"
                     variant="outline"
                     class="inline min-h-8 cursor-not-allowed opacity-50"
                   />
@@ -156,7 +158,13 @@ const downloadImageHeight = ref(600);
                 as-child
                 @click="applyTheme(name)"
               >
-                <Button class="w-full" variant="outline" size="sm">
+                <Button
+                  class="w-full"
+                  variant="outline"
+                  size="sm"
+                  :aria-label="`apply-theme-${name}-button`"
+                  :aria-labelledby="`apply-theme-${name}-button`"
+                >
                   {{ name }}
                 </Button>
               </SidebarMenuButton>
@@ -250,6 +258,8 @@ const downloadImageHeight = ref(600);
                       <div class="flex w-full flex-wrap gap-1">
                         <Button
                           class="flex-1"
+                          aria-label="duplicate-layer-button"
+                          aria-labelledby="duplicate-layer-button"
                           :class="
                             config.layers.length === maxLayerCount
                               ? 'cursor-not-allowed'
@@ -265,6 +275,8 @@ const downloadImageHeight = ref(600);
 
                         <Button
                           class="flex-1 cursor-pointer"
+                          aria-label="copy-layer-css-button"
+                          aria-labelledby="copy-layer-css-button"
                           variant="outline"
                           size="sm"
                           @click="copyTextLayer(layer)"
@@ -275,6 +287,8 @@ const downloadImageHeight = ref(600);
 
                         <Button
                           class="flex-1 cursor-pointer"
+                          aria-label="delete-layer-button"
+                          aria-labelledby="delete-layer-button"
                           variant="destructive"
                           size="sm"
                           @click="removeLayer(index)"
@@ -294,15 +308,32 @@ const downloadImageHeight = ref(600);
       <SidebarFooter>
         <div class="space-y-2">
           <ButtonGroup class="w-full">
-            <Button variant="outline" class="flex-1" @click="addLayer()">
+            <Button
+              aria-label="add-layer-button"
+              aria-labelledby="add-layer-button"
+              variant="outline"
+              class="flex-1"
+              @click="addLayer()"
+            >
               <HugeiconsIcon :icon="Plus" size="4" />
               Add
             </Button>
-            <Button variant="outline" class="flex-1" @click="reset()">
+            <Button
+              aria-label="reset-button"
+              aria-labelledby="reset-button"
+              variant="outline"
+              class="flex-1"
+              @click="reset()"
+            >
               <HugeiconsIcon :icon="Recycle03Icon" size="4" />
               Reset
             </Button>
-            <Button class="flex-2" @click="randomize()">
+            <Button
+              aria-label="randomize-button"
+              aria-labelledby="randomize-button"
+              class="flex-2"
+              @click="randomize()"
+            >
               <HugeiconsIcon :icon="ArrowDataTransferHorizontalIcon" size="4" />
               Randomize
             </Button>
@@ -322,6 +353,8 @@ const downloadImageHeight = ref(600);
           <Tooltip>
             <TooltipTrigger as-child>
               <Button
+                aria-label="copy-mesh-css-button"
+                aria-labelledby="copy-mesh-css-button"
                 data-sidebar="trigger"
                 data-slot="sidebar-trigger"
                 variant="ghost"
@@ -411,6 +444,8 @@ const downloadImageHeight = ref(600);
 
           <!-- Switch value -->
           <Button
+            aria-label="swap-width-height-button"
+            aria-labelledby="swap-width-height-button"
             variant="outline"
             @click="
               () => {
@@ -439,6 +474,8 @@ const downloadImageHeight = ref(600);
         </div>
 
         <Button
+          aria-label="download-mesh-image-button"
+          aria-labelledby="download-mesh-image-button"
           class="w-full"
           :disabled="downloadImageLoading"
           @click="
