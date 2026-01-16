@@ -54,7 +54,6 @@ useHead({
     { rel: "icon", href: "/favicon.ico" },
     // { rel: "manifest", href: "/site.webmanifest" },
   ],
-  
 });
 </script>
 

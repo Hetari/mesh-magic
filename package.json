@@ -26,6 +26,7 @@
     "eslint": "^9.0.0",
     "html-to-image": "^1.11.13",
     "nuxt": "^4.2.2",
+    "nuxt-seo-utils": "7.0.19",
     "reka-ui": "^2.7.0",
     "shadcn-nuxt": "2.4.3",
     "tailwind-merge": "^3.4.0",

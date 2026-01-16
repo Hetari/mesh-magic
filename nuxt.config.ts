@@ -20,12 +20,12 @@ export default defineNuxtConfig({
     "@nuxt/test-utils/module",
     "v-gsap-nuxt",
     // // seo modules
-    // "nuxt-schema-org",
-    // "nuxt-seo-utils",
+    //! "nuxt-schema-org",
     // "nuxt-link-checker",
     // "nuxt-og-image",
     "@nuxtjs/robots",
     "@nuxtjs/sitemap",
+    "nuxt-seo-utils",
   ],
 
   colorMode: {
