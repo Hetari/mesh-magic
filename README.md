@@ -31,17 +31,143 @@ A beautiful and intuitive mesh gradient generator built with Nuxt 4. Create stun
 - [x] Download gradient as image (PNG/JPG) with resolution (scale).
 - [x] Sidebar auto-toggle during download for clean capture
 - [x] Refactor sidebar into organized folder structure
-- [ ] Add draggable dots/controls on each layer for interactive positioning
-- [ ] Keyboard shortcuts for common actions
-- [ ] Undo/Redo functionality
-- [ ] Layer opacity control
-- [ ] Blend mode selection per layer
-- [ ] Gradient animation/transition preview
-- [ ] Save favorite gradients to localStorage
-- [ ] Share gradient via URL with encoded config
-- [ ] Layer templates/presets
-- [ ] Performance optimization for large layer counts
-- [ ] Make sure to be able to change baseColor to white
+
+---
+
+#### [ ] Add draggable dots/controls on each layer for interactive positioning
+
+**Goal:** Allow users to click and drag layer control points directly on the mesh preview.
+
+**Steps:**
+1. Create a `LayerControlPoint.vue` component that renders a draggable dot.
+2. Use VueUse's `useDraggable` or `useMouseInElement` to track drag events.
+3. Pass the layer's `x` and `y` values to position the dot.
+4. On drag, emit an `update:position` event with normalized coordinates (0-100).
+5. Connect this to the `MeshGradient` component layered over the gradient preview.
+6. Update `useMeshGradient.ts` to accept position updates from the control points.
+
+---
+
+#### [ ] Keyboard shortcuts for common actions
+
+**Goal:** Enable power users to interact faster with keyboard shortcuts.
+
+**Steps:**
+1. Use VueUse's `useMagicKeys` or `onKeyStroke` in the main layout or a composable.
+2. Define a map of shortcuts (e.g., `Ctrl+Z` for undo, `R` for randomize, `A` for add layer).
+3. Trigger the corresponding actions from `useMeshGradient` when keys are pressed.
+4. Display a "Keyboard Shortcuts" modal (`?` key) listing all available shortcuts.
+5. Handle edge cases (input focus should disable shortcuts).
+
+---
+
+#### [ ] Undo/Redo functionality
+
+**Goal:** Allow users to revert and re-apply changes to the gradient configuration.
+
+**Steps:**
+1. Create a `useHistory<T>` composable with `past`, `present`, and `future` stacks.
+2. Integrate it into `useMeshGradient.ts`, wrapping the `config` ref.
+3. On every significant change (add/remove layer, color change, position change), push to history.
+4. Expose `undo()`, `redo()`, `canUndo`, `canRedo` from the composable.
+5. Wire up keyboard shortcuts (`Ctrl+Z`, `Ctrl+Shift+Z`) and UI buttons.
+
+---
+
+#### [ ] Layer opacity control
+
+**Goal:** Allow users to adjust the transparency of each layer.
+
+**Steps:**
+1. Add an `opacity` field (0-1 or 0-100) to the `Layer` type in `useMeshGradient.ts`.
+2. Default new layers to `opacity: 1`.
+3. Add a `Slider` for opacity in `LayersSection.vue`.
+4. Update the mesh gradient rendering logic to apply `opacity` to each layer's CSS.
+
+---
+
+#### [ ] Blend mode selection per layer
+
+**Goal:** Allow users to choose CSS blend modes (e.g., `multiply`, `screen`, `overlay`).
+
+**Steps:**
+1. Add a `blendMode` field to the `Layer` type.
+2. Create a `Select` dropdown with common blend modes in `LayersSection.vue`.
+3. Apply `mix-blend-mode` CSS to each layer in the gradient renderer.
+
+---
+
+#### [ ] Gradient animation/transition preview
+
+**Goal:** Animate layer positions, colors, or blur over time for a preview effect.
+
+**Steps:**
+1. Add a "Preview Animation" toggle button.
+2. When enabled, use `setInterval` or GSAP to animate layer properties.
+3. Define preset animations (e.g., "Pulse", "Drift", "Color Cycle").
+4. Show a timeline or duration control.
+5. Allow exporting CSS keyframes or a GIF/video.
+
+---
+
+#### [ ] Save favorite gradients to localStorage
+
+**Goal:** Persist user-created gradients locally for later use.
+
+**Steps:**
+1. Create a "Save" button in the sidebar.
+2. Serialize `config` to JSON and store in `localStorage` with a unique ID.
+3. Create a "My Gradients" section/modal listing saved items.
+4. Allow loading, renaming, and deleting saved gradients.
+
+---
+
+#### [ ] Share gradient via URL with encoded config
+
+**Goal:** Generate a shareable URL containing the gradient configuration.
+
+**Steps:**
+1. Serialize `config` to a JSON string.
+2. Compress using `LZString` or `pako` for URL-friendliness.
+3. Encode to Base64 and append to the URL as a query param (e.g., `?g=...`).
+4. On page load, detect the param, decode, and apply the config.
+5. Add a "Copy Share Link" button.
+
+---
+
+#### [ ] Layer templates/presets
+
+**Goal:** Provide pre-configured layer setups users can apply instantly.
+
+**Steps:**
+1. Define template objects in a `presets.ts` file (e.g., "Sunset Glow", "Neon Burst").
+2. Create a "Templates" section in the sidebar with thumbnail previews.
+3. On click, replace or merge `config.layers` with the template's layers.
+
+---
+
+#### [ ] Performance optimization for large layer counts
+
+**Goal:** Ensure smooth rendering even with 10+ layers.
+
+**Steps:**
+1. Debounce/throttle slider updates using VueUse's `useDebounceFn`.
+2. Use `v-memo` or `shallowRef` for layer arrays where deep reactivity isn't needed.
+3. Consider rendering layers to an offscreen canvas for heavy blur effects.
+4. Profile with Vue DevTools and Chrome Performance tab to find bottlenecks.
+
+---
+
+#### [ ] Make sure to be able to change baseColor to white
+
+**Goal:** Allow the base/background color to be any color, including white.
+
+**Steps:**
+1. Review `config.baseColor` initialization in `useMeshGradient.ts`.
+2. Ensure the color picker and hex input accept `#FFFFFF` without resetting.
+3. Test the rendering with white background to verify layer visibility.
+4. If layers are invisible on white, consider adding a subtle border or shadow.
+
 
 ## Getting Started
 

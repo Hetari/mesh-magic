@@ -30,7 +30,7 @@ const showDownloadImageSizeDialog = ref(false);
                 <HugeiconsIcon
                   fetchpriority="high"
                   :icon="ColorsIcon"
-                  class="size-5"
+                  class="size-4.5"
                 />
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
@@ -68,7 +68,7 @@ const showDownloadImageSizeDialog = ref(false);
     <SidebarInset class="relative">
       <div class="relative">
         <SidebarTrigger
-          class="text-sidebar-primary-foreground absolute top-4 left-4 z-10 -ml-1 size-6 shadow"
+          class="text-sidebar-primary-foreground absolute top-4 left-4 z-10 -ml-1 size-4.5 shadow"
         />
 
         <TooltipProvider>
@@ -81,10 +81,10 @@ const showDownloadImageSizeDialog = ref(false);
                 data-slot="sidebar-trigger"
                 variant="ghost"
                 size="icon"
-                class="text-sidebar-primary-foreground absolute top-4 left-13 z-10 -ml-1 size-6 shadow"
+                class="text-sidebar-primary-foreground absolute top-4 left-11 z-10 -ml-1 size-4.5 shadow"
                 @click="copyMeshCSS"
               >
-                <HugeiconsIcon :icon="PaintBoardIcon" class="size-6" />
+                <HugeiconsIcon :icon="PaintBoardIcon" class="size-4.5" />
                 <span class="sr-only">Toggle Sidebar</span>
               </Button>
             </TooltipTrigger>
@@ -95,11 +95,20 @@ const showDownloadImageSizeDialog = ref(false);
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger as-child>
-              <HugeiconsIcon
-                class="text-sidebar-primary-foreground absolute top-4 left-22 z-10 -ml-1 size-6 cursor-pointer shadow"
-                :icon="ImageDownloadIcon"
+              <Button
+                aria-label="download-mesh-button"
+                aria-labelledby="download-mesh-button"
+                data-sidebar="trigger"
+                data-slot="sidebar-trigger"
+                variant="ghost"
+                size="icon"
+                class="text-sidebar-primary-foreground absolute top-4 left-18 z-10 -ml-1 size-4.5 shadow"
                 @click="showDownloadImageSizeDialog = true"
-              />
+              >
+                <HugeiconsIcon :icon="ImageDownloadIcon" class="size-4.5" />
+                <span class="sr-only">Toggle Sidebar</span>
+              </Button>
+
               <span class="sr-only">Download Mesh</span>
             </TooltipTrigger>
             <TooltipContent>Download Mesh</TooltipContent>

@@ -37,6 +37,7 @@ const { addLayer, reset, randomize } = useMeshGradient();
         aria-label="randomize-button"
         aria-labelledby="randomize-button"
         class="flex-2 transition-colors"
+        variant="ghost"
         :class="
           cn(
             'bg-white text-black hover:bg-gray-100 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-800',
