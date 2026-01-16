@@ -17,6 +17,7 @@
     "@hugeicons/vue": "^1.0.4",
     "@nuxt/eslint": "1.12.1",
     "@nuxt/hints": "1.0.0-alpha.5",
+    "@nuxtjs/robots": "5.6.7",
     "@vueuse/core": "^14.1.0",
     "@vueuse/nuxt": "14.1.0",
     "class-variance-authority": "^0.7.1",
