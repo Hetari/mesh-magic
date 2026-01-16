@@ -210,12 +210,12 @@ export function useMeshGradient() {
 
   const downloadMeshImage = async (
     {
-      width,
-      height,
+      scale = 1,
+      aspectRatio = "current",
       to,
     }: {
-      width: number;
-      height: number;
+      scale?: number;
+      aspectRatio?: "current" | "landscape" | "portrait" | "phone" | "square";
       to: "png" | "jpeg" | "svg";
     },
     onFinish?: VoidFunction,
@@ -226,12 +226,35 @@ export function useMeshGradient() {
     // Wait for next tick to ensure element is fully rendered
     await nextTick();
 
-    const pixelRatio = window.devicePixelRatio || 1;
+    // Get the element's actual displayed dimensions
+    const rect = element.getBoundingClientRect();
+    const width = rect.width;
+    let height = rect.height;
+
+    // Adjust dimensions based on aspect ratio
+    switch (aspectRatio) {
+      case "landscape": // 16:9
+        height = width * (9 / 16);
+        break;
+      case "portrait": // 9:16
+        height = width * (16 / 9);
+        break;
+      case "phone": // 9:19.5 (iPhone style)
+        height = width * (19.5 / 9);
+        break;
+      case "square": // 1:1
+        height = width;
+        break;
+      case "current":
+      default:
+        // Keep current dimensions
+        break;
+    }
 
     const baseOptions = {
       width,
       height,
-      pixelRatio,
+      pixelRatio: scale,
       cacheBust: true,
       useCORS: true,
       allowTaint: true,
@@ -239,8 +262,8 @@ export function useMeshGradient() {
 
     const rasterOptions = {
       ...baseOptions,
-      canvasWidth: width * pixelRatio,
-      canvasHeight: height * pixelRatio,
+      canvasWidth: width * scale,
+      canvasHeight: height * scale,
     };
 
     let dataUrl: string;
@@ -267,7 +290,7 @@ export function useMeshGradient() {
     onFinish?.();
 
     toast("Downloaded", {
-      description: `Mesh gradient downloaded as ${to.toUpperCase()}`,
+      description: `Mesh gradient downloaded as ${to.toUpperCase()} at ${scale}x resolution`,
       richColors: true,
     });
   };

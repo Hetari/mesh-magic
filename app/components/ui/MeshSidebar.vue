@@ -69,15 +69,25 @@ const setNewLayerCount = (v: number) => {
 
 const downloadImageLoading = ref(false);
 const showDownloadImageSizeDialog = ref(false);
-const IMAGE_PRESETS = [
-  { label: "Instagram Post (1080×1080)", w: 1080, h: 1080 },
-  { label: "Instagram Story (1080×1920)", w: 1080, h: 1920 },
-  { label: "Twitter / X (1200×675)", w: 1200, h: 675 },
-  { label: "Desktop HD (1920×1080)", w: 1920, h: 1080 },
-  { label: "4K (3840×2160)", w: 3840, h: 2160 },
+
+// Scale options (resolution quality)
+const SCALE_OPTIONS = [
+  { label: "1x (Standard)", value: 1 },
+  { label: "2x (High)", value: 2 },
+  { label: "3x (Very High)", value: 3 },
+  { label: "4x (Ultra)", value: 4 },
 ];
-const downloadImageWidth = ref(800);
-const downloadImageHeight = ref(600);
+
+// Format options
+const FORMAT_OPTIONS = [
+  { label: "PNG", value: "png" as const },
+  { label: "JPEG", value: "jpeg" as const },
+  { label: "SVG", value: "svg" as const },
+];
+
+const selectedScale = ref(2);
+const selectedAspect = ref<string>("current");
+const selectedFormat = ref<"png" | "jpeg" | "svg">("png");
 </script>
 
 <template>
@@ -400,88 +410,49 @@ const downloadImageHeight = ref(600);
   </SidebarProvider>
 
   <Dialog v-model:open="showDownloadImageSizeDialog">
-    <DialogContent>
+    <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Choose image width and height</DialogTitle>
+        <DialogTitle>Download Mesh Gradient</DialogTitle>
         <DialogDescription>
-          Download the mesh gradient as a PNG with a preset size or custom
-          dimensions.
+          Choose resolution, aspect ratio, and format for your download.
         </DialogDescription>
       </DialogHeader>
 
-      <div class="space-y-4">
-        <!-- Preset dropdown -->
-        <Select
-          @update:model-value="
-            (v) => {
-              const preset = IMAGE_PRESETS.find((p) => p.label === v);
-              if (!preset) return;
-              downloadImageWidth = preset.w;
-              downloadImageHeight = preset.h;
-            }
-          "
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Popular sizes" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="preset in IMAGE_PRESETS"
-              :key="preset.label"
-              :value="preset.label"
+      <div class="space-y-6">
+        <!-- Resolution / Scale -->
+        <div class="space-y-2">
+          <Label>Resolution Quality</Label>
+          <div class="grid grid-cols-4 gap-2">
+            <Button
+              v-for="option in SCALE_OPTIONS"
+              :key="option.value"
+              :variant="selectedScale === option.value ? 'default' : 'outline'"
+              size="sm"
+              class="text-xs"
+              @click="selectedScale = option.value"
             >
-              {{ preset.label }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-
-        <!-- Custom inputs -->
-        <div class="flex items-end gap-4">
-          <NumberField
-            :model-value="downloadImageWidth"
-            :min="100"
-            :max="5000"
-            @update:model-value="(v) => (downloadImageWidth = v)"
-          >
-            <Label>Width</Label>
-            <NumberFieldContent>
-              <NumberFieldDecrement />
-              <NumberFieldInput />
-              <NumberFieldIncrement />
-            </NumberFieldContent>
-          </NumberField>
-
-          <!-- Switch value -->
-          <Button
-            aria-label="swap-width-height-button"
-            aria-labelledby="swap-width-height-button"
-            variant="outline"
-            @click="
-              () => {
-                const temp = downloadImageWidth;
-                downloadImageWidth = downloadImageHeight;
-                downloadImageHeight = temp;
-              }
-            "
-          >
-            <HugeiconsIcon :icon="ArrowDataTransferHorizontalIcon" />
-          </Button>
-
-          <NumberField
-            :model-value="downloadImageHeight"
-            :min="100"
-            :max="5000"
-            @update:model-value="(v) => (downloadImageHeight = v)"
-          >
-            <Label>Height</Label>
-            <NumberFieldContent>
-              <NumberFieldDecrement />
-              <NumberFieldInput />
-              <NumberFieldIncrement />
-            </NumberFieldContent>
-          </NumberField>
+              {{ option.label }}
+            </Button>
+          </div>
         </div>
 
+        <!-- Format -->
+        <div class="space-y-2">
+          <Label>Format</Label>
+          <div class="grid grid-cols-3 gap-2">
+            <Button
+              v-for="option in FORMAT_OPTIONS"
+              :key="option.value"
+              :variant="selectedFormat === option.value ? 'default' : 'outline'"
+              size="sm"
+              @click="selectedFormat = option.value"
+            >
+              {{ option.label }}
+            </Button>
+          </div>
+        </div>
+
+        <!-- Download Button -->
         <Button
           aria-label="download-mesh-image-button"
           aria-labelledby="download-mesh-image-button"
@@ -490,9 +461,14 @@ const downloadImageHeight = ref(600);
           @click="
             downloadMeshImage(
               {
-                width: downloadImageWidth,
-                height: downloadImageHeight,
-                to: 'png',
+                scale: selectedScale,
+                aspectRatio: selectedAspect as
+                  | 'current'
+                  | 'landscape'
+                  | 'portrait'
+                  | 'phone'
+                  | 'square',
+                to: selectedFormat,
               },
               () => {
                 showDownloadImageSizeDialog = false;
@@ -503,7 +479,7 @@ const downloadImageHeight = ref(600);
           "
         >
           <LazySpinner v-if="downloadImageLoading" />
-          Download
+          Download {{ selectedFormat.toUpperCase() }} at {{ selectedScale }}x
         </Button>
       </div>
     </DialogContent>

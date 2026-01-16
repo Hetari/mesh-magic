@@ -245,11 +245,20 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    font-family: "Author";
-    @apply bg-background text-foreground overflow-x-clip;
+
+  html {
+    font-size: 1.1rem; 
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  /* make scrollbar thin and based on dark and light theme */
+
+  body {
+    font-family: "Author", system-ui, sans-serif;
+    @apply bg-background text-foreground overflow-x-clip;
+    @apply text-base leading-7; /* shadcn default paragraph styling */
+  }
+
+  /* Make scrollbar thin and based on dark and light theme */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
