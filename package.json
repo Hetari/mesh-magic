@@ -16,6 +16,7 @@
     "@hugeicons/core-free-icons": "^3.1.1",
     "@hugeicons/vue": "^1.0.4",
     "@nuxt/eslint": "1.12.1",
+    "@nuxt/fonts": "0.12.1",
     "@nuxt/hints": "1.0.0-alpha.5",
     "@nuxtjs/robots": "5.6.7",
     "@nuxtjs/sitemap": "7.5.2",

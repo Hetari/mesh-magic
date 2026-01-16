@@ -246,6 +246,7 @@
     @apply border-border outline-ring/50;
   }
   body {
+    font-family: "Author";
     @apply bg-background text-foreground overflow-x-clip;
   }
   /* make scrollbar thin and based on dark and light theme */

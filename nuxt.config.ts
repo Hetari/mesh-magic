@@ -26,6 +26,7 @@ export default defineNuxtConfig({
     "nuxt-seo-utils",
     "nuxt-link-checker",
     "nuxt-booster",
+    "@nuxt/fonts",
   ],
 
   colorMode: {
@@ -53,8 +54,11 @@ export default defineNuxtConfig({
     name: "Mesh Magic",
   },
 
-  // nuxt booster:
+  fonts: {
+    provider: "fontshare",
+  },
 
+  // nuxt booster:
   booster: {
     detection: {
       performance: true,
