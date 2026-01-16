@@ -28,10 +28,9 @@ A beautiful and intuitive mesh gradient generator built with Nuxt 4. Create stun
 
 ### Mesh Gradient
 
-- [x] Add copy CSS functionality
-- [ ] Add path changer for custom shapes
-- [ ] Add z-index control for layers
-- [x] Download gradient as image (PNG/JPG) with custom width and hight.
+- [x] Download gradient as image (PNG/JPG) with resolution (scale).
+- [x] Sidebar auto-toggle during download for clean capture
+- [x] Refactor sidebar into organized folder structure
 - [ ] Add draggable dots/controls on each layer for interactive positioning
 - [ ] Keyboard shortcuts for common actions
 - [ ] Undo/Redo functionality
