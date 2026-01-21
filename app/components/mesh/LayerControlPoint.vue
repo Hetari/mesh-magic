@@ -21,7 +21,7 @@ function onPointerDown(e: PointerEvent) {
 
   const target = el.value as HTMLElement;
   if (!target) return;
-
+  target.setPointerCapture(e.pointerId);
   const parent = target.offsetParent as HTMLElement;
   if (!parent) return;
 
@@ -66,7 +66,7 @@ function onPointerDown(e: PointerEvent) {
 <template>
   <div
     ref="el"
-    class="absolute size-4 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full shadow-sm ring-2 ring-white transition-transform hover:scale-110 active:scale-125 active:cursor-grabbing"
+    class="absolute size-4 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none rounded-full shadow-sm ring-2 ring-white transition-transform hover:scale-110 active:scale-125 active:cursor-grabbing"
     :class="{ 'z-50 scale-125 cursor-grabbing': isDragging }"
     :style="{
       left: `${x}%`,
