@@ -25,17 +25,16 @@ A beautiful and intuitive mesh gradient generator built with Nuxt 4. Create stun
 
 ## Feature Roadmap
 
-### [ ] Keyboard shortcuts for common actions
+### [x] Keyboard shortcuts for common actions
 
 **Goal:** Enable power users to interact faster with keyboard shortcuts.
 
-**Steps:**
-
-1. Use VueUse's `useMagicKeys` or `onKeyStroke` in the main layout or a composable.
-2. Define a map of shortcuts (e.g., `Ctrl+Z` for undo, `R` for randomize, `A` for add layer).
-3. Trigger the corresponding actions from `useMeshGradient` when keys are pressed.
-4. Display a "Keyboard Shortcuts" modal (`?` key) listing all available shortcuts.
-5. Handle edge cases (input focus should disable shortcuts).
+**Implementation:**
+- Created `useKeyboardShortcuts` composable using VueUse's `useMagicKeys` and `onKeyStroke`
+- Implemented shortcuts: `?` (help), `Ctrl+S` (save), `R` (randomize), `Ctrl+R` (reset), `A` (add layer), `Backspace/Delete` (remove layer), `D` (toggle dots)
+- Added keyboard shortcuts help dialog with categorized shortcuts
+- Shortcuts automatically disabled when typing in input fields
+- Cross-platform support (Ctrl for Windows/Linux, Cmd for macOS)
 
 ---
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ColorsIcon } from "@hugeicons/core-free-icons";
+import { ColorsIcon, HelpCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/vue";
 import ModeToggle from "../ui/ModeToggle.vue";
 import BaseColorSection from "./partials/BaseColorSection.vue";
@@ -9,10 +9,18 @@ import SidebarFooterActions from "./partials/SidebarFooterActions.vue";
 import DownloadDialog from "./partials/DownloadDialog.vue";
 import CopyMeshCssButton from "./partials/CopyMeshCssButton.vue";
 import DownloadMeshButton from "./partials/DownloadMeshButton.vue";
+import KeyboardShortcutsDialog from "./partials/KeyboardShortcutsDialog.vue";
 
 const showDownloadImageSizeDialog = ref(false);
 
 const { showDots } = useMeshGradient();
+const { showHelpDialog, openHelpDialog } = useKeyboardShortcuts();
+
+// Setup keyboard shortcuts
+const { setupShortcuts } = useAppKeyboardShortcuts();
+onMounted(() => {
+  setupShortcuts();
+});
 </script>
 
 <template>
@@ -77,11 +85,20 @@ const { showDots } = useMeshGradient();
 
         <CopyMeshCssButton />
         <DownloadMeshButton @click="showDownloadImageSizeDialog = true" />
+        <Button
+          variant="outline"
+          size="icon"
+          class="text-sidebar-primary-foreground shadow"
+          @click="openHelpDialog"
+        >
+          <HugeiconsIcon :icon="HelpCircleIcon" class="size-4" />
+        </Button>
       </div>
       <div class="flex min-h-dvh flex-1 flex-col overflow-clip">
         <slot />
       </div>
     </SidebarInset>
     <DownloadDialog v-model:open="showDownloadImageSizeDialog" />
+    <KeyboardShortcutsDialog v-model:open="showHelpDialog" />
   </SidebarProvider>
 </template>
