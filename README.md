@@ -38,7 +38,7 @@ A beautiful and intuitive mesh gradient generator built with Nuxt 4. Create stun
 
 ---
 
-### [ ] Undo/Redo functionality
+### [x] Undo/Redo functionality
 
 **Goal:** Allow users to revert and re-apply changes to the gradient configuration.
 

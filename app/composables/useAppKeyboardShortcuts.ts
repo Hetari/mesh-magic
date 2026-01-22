@@ -7,7 +7,7 @@ import { onKeyStroke } from "@vueuse/core";
  */
 export function useAppKeyboardShortcuts() {
   const { registerKeyStroke, toggleHelpDialog } = useKeyboardShortcuts();
-  const { config, addLayer, removeLayer, randomize, reset, showDots } = useMeshGradient();
+  const { config, addLayer, removeLayer, randomize, reset, showDots, undo, redo, canUndo, canRedo } = useMeshGradient();
   const { saveGradient, loadFromStorage } = useSavedGradients();
 
   // Load saved gradients on initialization
@@ -20,6 +20,73 @@ export function useAppKeyboardShortcuts() {
     // Show keyboard shortcuts help (?)
     registerKeyStroke("?", () => {
       toggleHelpDialog();
+    });
+
+    // Undo (Ctrl+Z / Cmd+Z) and Redo (Ctrl+Shift+Z / Cmd+Shift+Z)
+    onKeyStroke("z", (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        
+        // Don't trigger when typing
+        const activeElement = document.activeElement;
+        if (activeElement && (
+          activeElement.tagName.toLowerCase() === "input" ||
+          activeElement.tagName.toLowerCase() === "textarea"
+        )) {
+          return;
+        }
+        
+        // Check for Shift key for redo
+        if (e.shiftKey) {
+          if (canRedo.value) {
+            redo();
+          }
+        } else {
+          if (canUndo.value) {
+            undo();
+          }
+        }
+      }
+    });
+
+    // Redo with Ctrl+Shift+Z (uppercase Z)
+    onKeyStroke("Z", (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        
+        // Don't trigger when typing
+        const activeElement = document.activeElement;
+        if (activeElement && (
+          activeElement.tagName.toLowerCase() === "input" ||
+          activeElement.tagName.toLowerCase() === "textarea"
+        )) {
+          return;
+        }
+        
+        if (canRedo.value) {
+          redo();
+        }
+      }
+    });
+
+    // Redo (Ctrl+Y / Cmd+Y)
+    onKeyStroke("y", (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        
+        // Don't trigger when typing
+        const activeElement = document.activeElement;
+        if (activeElement && (
+          activeElement.tagName.toLowerCase() === "input" ||
+          activeElement.tagName.toLowerCase() === "textarea"
+        )) {
+          return;
+        }
+        
+        if (canRedo.value) {
+          redo();
+        }
+      }
     });
 
     // Save gradient (Ctrl+S / Cmd+S)

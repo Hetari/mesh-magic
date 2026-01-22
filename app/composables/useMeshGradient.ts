@@ -1,10 +1,12 @@
 import { ref, nextTick } from "vue";
 import { toast } from "vue-sonner";
+import { useDebounceFn, watchPausable } from "@vueuse/core";
 import { parseColor } from "~/components/ui/color-picker/color.utils";
 import type { ColorValue } from "~/components/ui/color-picker/types";
 import { themes } from "~/utils/themes";
 import { copyTextClient } from "~/utils/copy";
 import { toPng, toJpeg, toSvg } from "html-to-image";
+import { useHistory } from "./useHistory";
 
 const BASE_COLOR = "#020617";
 const DEFAULT_LAYER_COUNT = 4;
@@ -142,6 +144,42 @@ export function useMeshGradient() {
   }));
   const showDots = useState("show-dots", () => true);
 
+  // Initialize history tracking
+  const history = useHistory(config.value, { limit: 30, deep: true });
+
+  /**
+   * Records the current state to history (debounced for slider changes).
+   */
+  const debouncedRecordHistory = useDebounceFn(() => {
+    history.push(config.value);
+  }, 300);
+
+  /**
+   * Immediate history recording (for actions like add/remove layer).
+   */
+  const recordHistory = () => {
+    // Pause watcher temporarily to avoid double recording
+    pauseHistory();
+    
+    // Push immediately for discrete actions
+    history.push(config.value);
+    
+    // Resume watcher on next tick
+    nextTick(() => {
+      resumeHistory();
+    });
+  };
+
+  // Watch for config changes and record to history (for slider/color picker changes)
+  // Using watchPausable so we can pause during undo/redo operations
+  const { pause: pauseHistory, resume: resumeHistory } = watchPausable(
+    () => config.value,
+    () => {
+      debouncedRecordHistory();
+    },
+    { deep: true, flush: 'sync' }
+  );
+
   /**
    * Adds a new layer to the gradient.
    * @param color - Optional initial color for the new layer.
@@ -149,6 +187,7 @@ export function useMeshGradient() {
   const addLayer = (color?: ColorValue) => {
     if (config.value.layers.length === maxLayerCount.value) return;
     config.value.layers.push(makeLayer(color));
+    recordHistory();
   };
 
   /**
@@ -157,6 +196,7 @@ export function useMeshGradient() {
    */
   const removeLayer = (index: number) => {
     config.value.layers.splice(index, 1);
+    recordHistory();
   };
 
   /**
@@ -170,6 +210,7 @@ export function useMeshGradient() {
     if (!source) return;
     const dup = { ...source, id: generateLayerId() };
     config.value.layers.splice(index + 1, 0, dup);
+    recordHistory();
   };
 
   /**
@@ -179,6 +220,7 @@ export function useMeshGradient() {
    */
   const updateLayer = (index: number, layer: Layer) => {
     config.value.layers.splice(index, 1, layer);
+    recordHistory();
   };
 
   /**
@@ -192,6 +234,9 @@ export function useMeshGradient() {
     maxLayers = maxLayerCount.value,
     newBaseColor?: string,
   ) => {
+    // Pause watcher to avoid double recording
+    pauseHistory();
+    
     if (newBaseColor) {
       config.value.baseColor = parseColor(newBaseColor);
     }
@@ -205,6 +250,12 @@ export function useMeshGradient() {
       newLayers.push(makeLayer());
     }
     config.value.layers = newLayers;
+    
+    // Record and resume
+    history.push(config.value);
+    nextTick(() => {
+      resumeHistory();
+    });
   };
 
   /**
@@ -214,15 +265,35 @@ export function useMeshGradient() {
   const applyTheme = (name: keyof typeof themes) => {
     const t = themes[name];
     if (!t) return;
+    
+    // Pause watcher to avoid double recording
+    pauseHistory();
+    
     config.value.layers = t.map((c) => makeLayer(c));
+    
+    // Record and resume
+    history.push(config.value);
+    
+    nextTick(() => {
+      resumeHistory();
+    });
   };
 
   /**
    * Resets the gradient to its default state.
    */
   const reset = () => {
+    // Pause watcher to avoid double recording
+    pauseHistory();
+    
     config.value.baseColor = parseColor(BASE_COLOR);
     config.value.layers = generateInitialLayers();
+    
+    // Record and resume
+    history.push(config.value);
+    nextTick(() => {
+      resumeHistory();
+    });
   };
 
   /**
@@ -373,6 +444,52 @@ export function useMeshGradient() {
     });
   };
 
+  /**
+   * Undoes the last change.
+   */
+  const undo = () => {
+    if (!history.canUndo.value) return;
+    
+    // Pause history recording
+    pauseHistory();
+    
+    // Perform undo
+    history.undo();
+    config.value = history.present.value;
+    
+    // Resume history recording after a short delay
+    nextTick(() => {
+      resumeHistory();
+    });
+    
+    toast.success("Undo", {
+      description: "Reverted to previous state",
+    });
+  };
+
+  /**
+   * Redoes the last undone change.
+   */
+  const redo = () => {
+    if (!history.canRedo.value) return;
+    
+    // Pause history recording
+    pauseHistory();
+    
+    // Perform redo
+    history.redo();
+    config.value = history.present.value;
+    
+    // Resume history recording after a short delay
+    nextTick(() => {
+      resumeHistory();
+    });
+    
+    toast.success("Redo", {
+      description: "Restored next state",
+    });
+  };
+
   return {
     config,
     showDots,
@@ -386,5 +503,9 @@ export function useMeshGradient() {
     copyTextLayer,
     copyMeshCSS,
     downloadMeshImage,
+    undo,
+    redo,
+    canUndo: history.canUndo,
+    canRedo: history.canRedo,
   };
 }

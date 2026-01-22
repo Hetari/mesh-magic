@@ -34,6 +34,9 @@ const categories: ShortcutCategory[] = [
     title: "General",
     shortcuts: [
       { name: "Show keyboard shortcuts", keys: "?", macKeys: "?" },
+      { name: "Undo", keys: "Ctrl+Z", macKeys: "Cmd+Z" },
+      { name: "Redo", keys: "Ctrl+Shift+Z", macKeys: "Cmd+Shift+Z" },
+      { name: "Redo (alternative)", keys: "Ctrl+Y", macKeys: "Cmd+Y" },
       { name: "Save gradient", keys: "Ctrl+S", macKeys: "Cmd+S" },
       { name: "Randomize gradient", keys: "R", macKeys: "R" },
       { name: "Reset gradient", keys: "Ctrl+R", macKeys: "Cmd+R" },
