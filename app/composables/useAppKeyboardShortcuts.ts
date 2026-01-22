@@ -98,6 +98,8 @@ export function useAppKeyboardShortcuts() {
 
     // Add new layer (A)
     registerKeyStroke("a", () => {
+      if (isTypingInInput()) return;
+      
       if (config.value.layers.length >= 8) {
         toast.error("Maximum layers reached", {
           description: "You can have up to 8 layers",
@@ -112,6 +114,8 @@ export function useAppKeyboardShortcuts() {
 
     // Delete last layer (Backspace / Delete)
     registerKeyStroke("Backspace", () => {
+      if (isTypingInInput()) return;
+      
       if (config.value.layers.length <= 1) {
         toast.error("Cannot delete layer", {
           description: "At least one layer is required",
@@ -126,6 +130,8 @@ export function useAppKeyboardShortcuts() {
     });
 
     registerKeyStroke("Delete", () => {
+      if (isTypingInInput()) return;
+      
       if (config.value.layers.length <= 1) {
         toast.error("Cannot delete layer", {
           description: "At least one layer is required",

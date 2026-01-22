@@ -7,6 +7,7 @@ import { themes } from "~/utils/themes";
 import { copyTextClient } from "~/utils/copy";
 import { toPng, toJpeg, toSvg } from "html-to-image";
 import { useHistory } from "./useHistory";
+import { deepClone } from "~/utils/clone";
 
 const BASE_COLOR = "#020617";
 const DEFAULT_LAYER_COUNT = 4;
@@ -228,7 +229,9 @@ export function useMeshGradient() {
 
     const source = config.value.layers[index];
     if (!source) return;
-    const dup = { ...source, id: generateLayerId() };
+    
+    // Deep clone to avoid shared references for nested arrays
+    const dup = { ...deepClone(source), id: generateLayerId() };
     config.value.layers.splice(index + 1, 0, dup);
     recordHistory();
   };

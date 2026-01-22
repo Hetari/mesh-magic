@@ -22,6 +22,9 @@ export function useHistory<T>(
 ) {
   const { limit = 30, deep = true } = options;
 
+  // Store a snapshot of the original initial value for reset
+  const storedInitial = deep ? deepClone(initialValue) : initialValue;
+
   // History stacks
   const past = ref<T[]>([]);
   const present = ref<T>(deep ? deepClone(initialValue) : initialValue);
@@ -114,7 +117,7 @@ export function useHistory<T>(
    * Resets to initial value and clears history.
    */
   function reset() {
-    present.value = clone(initialValue);
+    present.value = clone(storedInitial);
     clear();
   }
 
