@@ -194,7 +194,7 @@ export function useMeshGradient() {
   // Watch for config changes and record to history (for slider/color picker changes)
   // Using watchPausable so we can pause during undo/redo operations
   const { pause: pauseHistory, resume: resumeHistory } = watchPausable(
-    () => config.value,
+    config,
     () => {
       debouncedRecordHistory();
     },

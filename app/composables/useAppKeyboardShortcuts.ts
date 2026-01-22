@@ -22,9 +22,13 @@ export function useAppKeyboardShortcuts() {
      */
     const isTypingInInput = (): boolean => {
       const activeElement = document.activeElement;
-      return !!activeElement && (
-        activeElement.tagName.toLowerCase() === "input" ||
-        activeElement.tagName.toLowerCase() === "textarea"
+      if (!activeElement) return false;
+      
+      const tagName = activeElement.tagName.toLowerCase();
+      return (
+        tagName === "input" ||
+        tagName === "textarea" ||
+        activeElement.getAttribute("contenteditable") === "true"
       );
     };
 
@@ -36,9 +40,10 @@ export function useAppKeyboardShortcuts() {
     // Undo (Ctrl+Z / Cmd+Z) and Redo (Ctrl+Shift+Z / Cmd+Shift+Z)
     onKeyStroke("z", (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        
+        // Don't interfere with native undo/redo in inputs
         if (isTypingInInput()) return;
+        
+        e.preventDefault();
         
         // Check for Shift key for redo
         if (e.shiftKey) {
@@ -56,9 +61,10 @@ export function useAppKeyboardShortcuts() {
     // Redo (Ctrl+Y / Cmd+Y)
     onKeyStroke("y", (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        
+        // Don't interfere with native redo in inputs
         if (isTypingInInput()) return;
+        
+        e.preventDefault();
         
         if (canRedo.value) {
           redo();
