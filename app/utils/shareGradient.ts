@@ -1,5 +1,5 @@
 import LZString from "lz-string";
-import type { MeshConfig } from "~/composables/useMeshGradient";
+import type { MeshConfig, BlendMode } from "~/composables/useMeshGradient";
 import { parseColor } from "../components/ui/color-picker/color.utils";
 
 /**
@@ -14,7 +14,7 @@ type EncodedLayer = {
   opacity: number[];
   size: number;
   borderRadius: string;
-  blendMode?: string;
+  blendMode: BlendMode;
 };
 
 /**
@@ -42,7 +42,7 @@ export function encodeGradientConfig(config: MeshConfig): string {
       opacity: layer.opacity,
       size: layer.size,
       borderRadius: layer.borderRadius,
-      blendMode: "blendMode" in layer ? (layer.blendMode as string) : "normal",
+      blendMode: layer.blendMode,
     })),
   };
 
@@ -107,7 +107,7 @@ export function decodeGradientConfig(encoded: string): MeshConfig | null {
         opacity: layer.opacity,
         size: layer.size,
         borderRadius: layer.borderRadius,
-        ...(layer.blendMode && { blendMode: layer.blendMode as string }), // Only add if present
+        blendMode: layer.blendMode,
       })),
     };
 

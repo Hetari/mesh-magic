@@ -19,6 +19,7 @@ describe("shareGradient", () => {
         opacity: [80],
         size: 70,
         borderRadius: "50%",
+        blendMode: "normal",
       },
     ],
   };
@@ -49,6 +50,7 @@ describe("shareGradient", () => {
     expect(decoded?.layers[0]?.y[0]).toBe(50);
     expect(decoded?.layers[0]?.size).toBe(70);
     expect(decoded?.layers[0]?.color.hex).toBe("#ff0000");
+    expect(decoded?.layers[0]?.blendMode).toBe("normal");
   });
 
   it("should return null for invalid encoded string", () => {
