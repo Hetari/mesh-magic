@@ -49,9 +49,7 @@ const categories: ShortcutCategory[] = [
   },
   {
     title: "Navigation",
-    shortcuts: [
-      { name: "Close dialog", keys: "Escape", macKeys: "Escape" },
-    ],
+    shortcuts: [{ name: "Close dialog", keys: "Escape", macKeys: "Escape" }],
   },
 ];
 
@@ -74,12 +72,15 @@ const formatKeys = (keys: string, macKeys?: string): string => {
     })
     .join(" + ");
 };
-
 </script>
 
 <template>
-  <Dialog :open="open" @update:open="emit('update:open', $event)">
-    <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
+  <Dialog
+    class="hidden sm:block"
+    :open="open"
+    @update:open="emit('update:open', $event)"
+  >
+    <DialogContent class="max-h-[80vh] max-w-2xl overflow-y-auto">
       <DialogHeader>
         <DialogTitle>Keyboard Shortcuts</DialogTitle>
         <DialogDescription>
@@ -87,13 +88,13 @@ const formatKeys = (keys: string, macKeys?: string): string => {
         </DialogDescription>
       </DialogHeader>
 
-      <div class="space-y-6 mt-4">
+      <div class="mt-4 space-y-6">
         <div
           v-for="category in categories"
           :key="category.title"
           class="space-y-3"
         >
-          <h3 class="text-sm font-semibold text-foreground">
+          <h3 class="text-foreground text-sm font-semibold">
             {{ category.title }}
           </h3>
           <div class="space-y-2">
@@ -102,11 +103,11 @@ const formatKeys = (keys: string, macKeys?: string): string => {
               :key="shortcut.name"
               class="flex items-center justify-between py-2"
             >
-              <span class="text-sm text-muted-foreground">
+              <span class="text-muted-foreground text-sm">
                 {{ shortcut.name }}
               </span>
               <kbd
-                class="px-2 py-1 text-xs font-semibold text-foreground bg-muted border border-border rounded"
+                class="text-foreground bg-muted border-border rounded border px-2 py-1 text-xs font-semibold"
               >
                 {{ formatKeys(shortcut.keys, shortcut.macKeys) }}
               </kbd>
@@ -116,8 +117,8 @@ const formatKeys = (keys: string, macKeys?: string): string => {
         </div>
       </div>
 
-      <div class="mt-6 p-3 bg-muted/50 rounded-lg">
-        <p class="text-xs text-muted-foreground">
+      <div class="bg-muted/50 mt-6 rounded-lg p-3">
+        <p class="text-muted-foreground text-xs">
           <span class="font-semibold">Tip:</span> Shortcuts are disabled when
           typing in input fields
         </p>

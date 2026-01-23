@@ -10,6 +10,7 @@ import DownloadDialog from "./partials/DownloadDialog.vue";
 import CopyMeshCssButton from "./partials/CopyMeshCssButton.vue";
 import DownloadMeshButton from "./partials/DownloadMeshButton.vue";
 import KeyboardShortcutsDialog from "./partials/KeyboardShortcutsDialog.vue";
+import GitHubStarButton from "./partials/GitHubStarButton.vue";
 
 const showDownloadImageSizeDialog = ref(false);
 
@@ -85,6 +86,7 @@ onMounted(() => {
 
         <CopyMeshCssButton />
         <DownloadMeshButton @click="showDownloadImageSizeDialog = true" />
+        <GitHubStarButton />
         <Button
           variant="outline"
           size="icon"

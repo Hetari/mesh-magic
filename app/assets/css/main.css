@@ -247,13 +247,12 @@
   }
 
   html {
-    font-size: 1.1rem; 
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    font-family: "Author", system-ui, sans-serif;
+    font-family:  system-ui, sans-serif;
     @apply bg-background text-foreground overflow-x-clip;
     @apply text-base leading-7; /* shadcn default paragraph styling */
   }
