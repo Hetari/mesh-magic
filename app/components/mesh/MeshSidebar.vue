@@ -5,6 +5,7 @@ import ModeToggle from "../ui/ModeToggle.vue";
 import BaseColorSection from "./partials/BaseColorSection.vue";
 import ThemesSection from "./partials/ThemesSection.vue";
 import LayersSection from "./partials/LayersSection.vue";
+import NoiseSection from "./partials/NoiseSection.vue";
 import SidebarFooterActions from "./partials/SidebarFooterActions.vue";
 import DownloadDialog from "./partials/DownloadDialog.vue";
 import CopyMeshCssButton from "./partials/CopyMeshCssButton.vue";
@@ -69,6 +70,8 @@ onMounted(() => {
             <Label for="show-dots">Show Controls</Label>
           </div>
         </SidebarGroup>
+
+        <NoiseSection />
 
         <ThemesSection />
 

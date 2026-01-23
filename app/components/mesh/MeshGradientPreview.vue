@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import LayerControlPoint from "./LayerControlPoint.vue";
 
-const { config, showDots } = useMeshGradient();
+const { config, showDots, showNoise, noiseOpacity } = useMeshGradient();
 
 function updateLayerPosition(index: number, x: number, y: number) {
   if (!config.value || !config.value.layers[index]) return;
@@ -37,7 +37,9 @@ function updateLayerPosition(index: number, x: number, y: number) {
 
     <!-- Grain Texture Overlay -->
     <div
-      class="pointer-events-none absolute inset-0 bg-[url('/noise.svg')] opacity-[0.5] mix-blend-overlay"
+      v-if="showNoise"
+      class="pointer-events-none absolute inset-0 bg-[url('/noise.svg')] mix-blend-overlay"
+      :style="{ opacity: noiseOpacity[0] / 100 }"
     />
 
     <!-- Control Points -->

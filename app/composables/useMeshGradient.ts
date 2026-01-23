@@ -190,6 +190,8 @@ export function useMeshGradient() {
     layers: generateInitialLayers(),
   }));
   const showDots = useState("show-dots", () => true);
+  const showNoise = useState("show-noise", () => true);
+  const noiseOpacity = useState("noise-opacity", () => [50]);
 
   // Initialize history tracking
   const history = useHistory(config.value, { limit: 30, deep: true });
@@ -570,6 +572,8 @@ export function useMeshGradient() {
   return {
     config,
     showDots,
+    showNoise,
+    noiseOpacity,
     addLayer,
     removeLayer,
     duplicateLayer,
