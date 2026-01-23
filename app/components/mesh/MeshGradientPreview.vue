@@ -31,6 +31,7 @@ function updateLayerPosition(index: number, x: number, y: number) {
         filter: `blur(${layer.blur[0]}px)`,
         borderRadius: layer.borderRadius,
         opacity: (layer.opacity[0] ?? 100) / 100,
+        mixBlendMode: layer.blendMode,
       }"
     />
 

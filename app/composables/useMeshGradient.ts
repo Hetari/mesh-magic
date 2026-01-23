@@ -22,6 +22,49 @@ const DEFAULT_LAYER_COUNT = 4;
 export const maxLayerCount = ref(8);
 
 /**
+ * CSS blend modes available for layers.
+ */
+export type BlendMode =
+  | "normal"
+  | "multiply"
+  | "screen"
+  | "overlay"
+  | "darken"
+  | "lighten"
+  | "color-dodge"
+  | "color-burn"
+  | "hard-light"
+  | "soft-light"
+  | "difference"
+  | "exclusion"
+  | "hue"
+  | "saturation"
+  | "color"
+  | "luminosity";
+
+/**
+ * Available blend modes with labels for UI display.
+ */
+export const BLEND_MODES: { value: BlendMode; label: string }[] = [
+  { value: "normal", label: "Normal" },
+  { value: "multiply", label: "Multiply" },
+  { value: "screen", label: "Screen" },
+  { value: "overlay", label: "Overlay" },
+  { value: "darken", label: "Darken" },
+  { value: "lighten", label: "Lighten" },
+  { value: "color-dodge", label: "Color Dodge" },
+  { value: "color-burn", label: "Color Burn" },
+  { value: "hard-light", label: "Hard Light" },
+  { value: "soft-light", label: "Soft Light" },
+  { value: "difference", label: "Difference" },
+  { value: "exclusion", label: "Exclusion" },
+  { value: "hue", label: "Hue" },
+  { value: "saturation", label: "Saturation" },
+  { value: "color", label: "Color" },
+  { value: "luminosity", label: "Luminosity" },
+];
+
+/**
  * Represents a single layer in the mesh gradient.
  */
 export type Layer = {
@@ -41,6 +84,8 @@ export type Layer = {
   size: number;
   /** CSS border-radius value. */
   borderRadius: string;
+  /** CSS blend mode for the layer. */
+  blendMode: BlendMode;
 };
 
 /**
@@ -117,6 +162,7 @@ const makeLayer = (
     size: randomNumber(50, 90),
     blur: [randomNumber(80, 180)],
     borderRadius: generateOrganicRadius(),
+    blendMode: "normal",
   };
 };
 
@@ -334,6 +380,7 @@ export function useMeshGradient() {
     const colorHex = (layer.color?.hex ?? "#000000").toLowerCase();
     const brRaw = layer.borderRadius ?? "50%";
     const brForClass = brRaw.replace(/\s+/g, "_");
+    const blendMode = layer.blendMode ?? "normal";
 
     const classes = [
       "absolute",
@@ -343,7 +390,8 @@ export function useMeshGradient() {
       `h-[${size}px]`,
       `bg-[${colorHex}]`,
       `rounded-[${brForClass}]`,
-    ];
+      blendMode !== "normal" ? `mix-blend-[${blendMode}]` : "",
+    ].filter(Boolean);
 
     const classString = classes.join(" ");
     const htmlSnippet = `<div class="${classString}"></div>`;

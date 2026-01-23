@@ -6,7 +6,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/vue";
 
-import { maxLayerCount } from "~/composables/useMeshGradient";
+import { maxLayerCount, BLEND_MODES } from "~/composables/useMeshGradient";
 
 const { config, duplicateLayer, removeLayer, copyTextLayer } =
   useMeshGradient();
@@ -103,6 +103,28 @@ const { config, duplicateLayer, removeLayer, copyTextLayer } =
                   :min="0"
                   :max="100"
                 />
+              </div>
+
+              <div class="space-y-1">
+                <div class="text-muted-foreground text-xs">
+                  <span>Blend Mode</span>
+                </div>
+
+                <Select v-model="config!.layers![index]!.blendMode">
+                  <SelectTrigger class="h-8 w-full text-xs">
+                    <SelectValue placeholder="Select blend mode" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="mode in BLEND_MODES"
+                      :key="mode.value"
+                      :value="mode.value"
+                      class="text-xs"
+                    >
+                      {{ mode.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div class="flex w-full flex-wrap gap-1">
