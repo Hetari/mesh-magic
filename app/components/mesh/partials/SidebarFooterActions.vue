@@ -5,12 +5,13 @@ import {
   Recycle03Icon,
   Bookmark01Icon,
   FolderLibraryIcon,
+  Share08Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/vue";
 import { useSavedGradients } from "~/composables/useSavedGradients";
 import SavedGradientsDialog from "./SavedGradientsDialog.vue";
 
-const { config, addLayer, reset, randomize } = useMeshGradient();
+const { config, addLayer, reset, randomize, copyShareUrl } = useMeshGradient();
 const { saveGradient } = useSavedGradients();
 
 const showSavedGradientsDialog = ref(false);
@@ -66,6 +67,24 @@ const handleSave = () => {
         My Gradients
       </Button>
     </ButtonGroup>
+    <ClientOnly>
+      <Button
+        aria-label="share-gradient-button"
+        aria-labelledby="share-gradient-button"
+        variant="outline"
+        class="w-full"
+        @click="copyShareUrl"
+      >
+        <HugeiconsIcon :icon="Share08Icon" size="4" />
+        Copy Share Link
+      </Button>
+      <template #fallback>
+        <Button variant="outline" class="w-full" disabled>
+          <Skeleton class="h-4 bg-white/30 w-4 rounded-full" />
+          <Skeleton class="h-4 bg-white/30 w-28" />
+        </Button>
+      </template>
+    </ClientOnly>
     <Button
       aria-label="randomize-button"
       aria-labelledby="randomize-button"

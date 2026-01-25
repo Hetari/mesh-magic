@@ -25,7 +25,7 @@ A beautiful and intuitive mesh gradient generator built with Nuxt 4. Create stun
 
 ## Feature Roadmap
 
-### [ ] Share gradient via URL with encoded config
+### [x] Share gradient via URL with encoded config
 
 **Goal:** Generate a shareable URL containing the gradient configuration.
 
