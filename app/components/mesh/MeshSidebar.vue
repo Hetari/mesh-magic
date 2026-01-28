@@ -93,7 +93,7 @@ onMounted(() => {
         <Button
           variant="outline"
           size="icon"
-          class="text-sidebar-primary-foreground shadow"
+          class="shadow"
           aria-label="Help"
           @click="openHelpDialog"
         >
