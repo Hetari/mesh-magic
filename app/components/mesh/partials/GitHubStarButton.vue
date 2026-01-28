@@ -26,7 +26,7 @@ const digits = computed(() =>
     as="a"
     href="https://github.com/Hetari/mesh-magic"
     target="_blank"
-    class="text-sidebar-primary-foreground flex h-9 items-center gap-2 px-3 shadow"
+    class="flex h-9 items-center gap-2 px-3 shadow"
   >
     <HugeiconsIcon :icon="GithubIcon" class="size-4" />
     <div>
