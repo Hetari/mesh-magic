@@ -4,8 +4,8 @@
 
 A beautiful and intuitive mesh gradient generator built with Nuxt 4. Create stunning gradients for your next project with precision and style.
 
-🌐 **Live Demo:** [https://mesh-magic.netlify.app/](https://mesh-magic.netlify.app/)
-<img src="https://mesh-magic.netlify.app/preview.png" alt="Mesh Magic Preview" />
+🌐 **Live Demo:**   [https://mesh-magic-hbt934.cranl.net/](https://mesh-magic-hbt934.cranl.net/)
+<img src="https://mesh-magic-hbt934.cranl.net/preview.png" alt="Mesh Magic Preview" />
 
 ## Features
 
